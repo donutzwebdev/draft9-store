@@ -153,12 +153,20 @@ const firebaseConfig = {
   appId: "1:905853292900:web:a48fccec2379ccb6642a71"
 };
 
-window.onload = function() {
+const firebaseConfig = {
+  apiKey: "AIzaSyB4VZR4PTk27NTb0Ox7UEBiSsxP6zCVinw",
+  authDomain: "draft9-fe68d.firebaseapp.com",
+  projectId: "draft9-fe68d",
+  storageBucket: "draft9-fe68d.firebasestorage.app",
+  messagingSenderId: "905853292900",
+  appId: "1:905853292900:web:a48fccec2379ccb6642a71"
+};
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
-let me         = null; // { uid, name }
+let me         = null;
 let servers    = [];
 let dms        = [];
 let activeChat = null;
@@ -370,8 +378,6 @@ function toast(msg) {
 
 // ── UTILS ────────────────────────────
 function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-}; // end window.onload
 </script>
 </body>
 </html>
