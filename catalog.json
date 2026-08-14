@@ -1,10 +1,22 @@
- [ { "id": "calculator", "name": "Calculator", "icon": "🧮", "description": "A simple calculator.", "version": "1.0", "type": "html", "category": "Utilities", "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/calculator.html" } {
-  "id": "messages",
-  "name": "Messages",
-  "icon": "💬",
-  "description": "Real-time servers and DMs. Create a server, share the code, chat instantly.",
-  "version": "1.0",
-  "type": "html",
-  "category": "Social",
-  "url": "https://cdn.jsdelivr.net/gh/donutzwebdev/draft9-store@latest/apps/messages.html"
-} ]
+[
+  {
+    "id": "calculator",
+    "name": "Calculator",
+    "icon": "🧮",
+    "description": "A simple calculator.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Utilities",
+    "url": "https://cdn.jsdelivr.net/gh/donutzwebdev/draft9-store@latest/apps/calculator.html"
+  },
+  {
+    "id": "messages",
+    "name": "Messages",
+    "icon": "💬",
+    "description": "Real-time servers and DMs. Create a server, share the code, chat instantly.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Social",
+    "url": "https://cdn.jsdelivr.net/gh/donutzwebdev/draft9-store@latest/apps/messages.html"
+  }
+]
