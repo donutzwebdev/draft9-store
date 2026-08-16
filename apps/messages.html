@@ -40,8 +40,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 .user-pfp{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;cursor:pointer;}
 .user-pfp img,.chat-avatar img,.ch-avatar img,.msg-pfp img{width:100%;height:100%;object-fit:cover;border-radius:inherit;}
 .user-name{font-size:.78rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.logout-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem;padding:2px;}
-.logout-btn:hover{color:var(--danger);}
+.logout-btn{background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.25);border-radius:6px;color:#ff6b6b;cursor:pointer;font-size:.68rem;padding:4px 8px;font-family:var(--font);font-weight:600;transition:all .15s;white-space:nowrap;}
+.logout-btn:hover{background:rgba(255,80,80,.25);}
 .sb-actions{display:flex;gap:4px;flex-wrap:wrap;}
 .sb-btn{flex:1;min-width:0;background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 6px;color:var(--text2);font-size:.64rem;font-family:var(--font);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-btn:hover{background:var(--glass2);color:var(--text);}
@@ -171,7 +171,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
       <div class="sidebar-user">
         <div class="user-pfp" id="my-pfp" title="Change profile picture">?</div>
         <div class="user-name" id="my-name">…</div>
-        <button class="logout-btn" id="logout-btn" title="Sign out">⏻</button>
+        <button class="logout-btn" id="logout-btn" title="Sign out">Sign Out</button>
       </div>
       <div class="sb-actions">
         <button class="sb-btn" id="btn-join">🔑 Join</button>
@@ -290,6 +290,7 @@ function showApp(){
     show('setup');
     activeChat=null;
   });
+  checkBroadcasts();
   wire('logout-btn',logout);
   wire('btn-create',showCreate);
   wire('btn-join',showJoin);
@@ -483,27 +484,27 @@ function onAttachFile(e){
     var dataUrl=ev.target.result;
     var isImage=file.type.startsWith('image/');
     if(banned){
-      // Send to global pending queue for Draft 9 admin review
-      var chatRef = activeChat
-        ? { type: activeChat.type, id: activeChat.id }
-        : null;
-      if(!chatRef){ pushNotif('🚫','Blocked','That file type is not allowed here.'); return; }
-      db.collection('d9_pending_files').add({
-        url: dataUrl,
-        fileName: file.name,
-        fileSize: file.size,
-        ext: ext,
-        sender: me.name,
-        senderUid: me.uid,
-        senderPfp: myPfpUrl||null,
-        chatType: chatRef.type,
-        chatId: chatRef.id,
-        status: 'pending',
-        submittedAt: fts()
-      }).then(function(){
-        pushNotif('📋','File pending review',
-          file.name+' ('+ext+') was flagged. A Draft 9 admin will review it before it appears in chat.');
-      });
+      if(!activeChat){ pushNotif('🚫','Blocked','That file type is not allowed here.'); return; }
+      var BANNED_LIST='.exe, .bat, .cmd, .sh, .msi, .dmg, .ps1, .vbs, .js, .jar, .app, .scr, .pif, .com, .hta, .wsf';
+      // Show approval request as a chat message UI (not sent to Firestore yet)
+      var reqId='req_'+Date.now();
+      var area=byId('msgs');
+      if(area){
+        var reqEl=document.createElement('div');
+        reqEl.id=reqId;
+        reqEl.style.cssText='margin:8px 0;background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.25);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;';
+        reqEl.innerHTML='<div style="display:flex;align-items:center;gap:8px;">'
+          +'<span style="font-size:1.2rem;">⚠️</span>'
+          +'<div><div style="font-size:.8rem;font-weight:700;color:#ff9500;">'+h(file.name)+'</div>'
+          +'<div style="font-size:.7rem;color:var(--text2);">This file seems to be harmful and cannot be sent without admin approval.</div></div></div>'
+          +'<div style="font-size:.68rem;color:var(--text3);line-height:1.6;"><b>Files requiring approval:</b><br>'+BANNED_LIST+'</div>'
+          +'<div style="display:flex;gap:8px;align-items:center;">'
+          +'<button onclick="submitFileForApproval(\''+reqId+'\','+JSON.stringify(JSON.stringify({url:dataUrl,fileName:file.name,fileSize:file.size,ext:ext}))+');" style="background:#ff9500;border:none;border-radius:6px;padding:6px 14px;color:#fff;font-family:var(--font);font-size:.74rem;font-weight:600;cursor:pointer;">Request Approval</button>'
+          +'<button onclick="document.getElementById(\''+reqId+'\').remove();" style="background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--text2);font-family:var(--font);font-size:.74rem;cursor:pointer;">Cancel</button>'
+          +'</div>';
+        area.appendChild(reqEl);
+        area.scrollTop=area.scrollHeight;
+      }
       return;
     }
     if(isImage){
@@ -629,21 +630,54 @@ function showAdminPanel(s){
   });
 }
 
-// Global Draft 9 admin panel
+function submitFileForApproval(reqId,fJson){
+  if(!activeChat){ return; }
+  var f=JSON.parse(fJson);
+  db.collection('d9_pending_files').add({
+    url:f.url, fileName:f.fileName, fileSize:f.fileSize,
+    ext:f.ext, sender:me.name, senderUid:me.uid,
+    senderPfp:myPfpUrl||null,
+    chatType:activeChat.type, chatId:activeChat.id,
+    status:'pending', submittedAt:fts()
+  }).then(function(){
+    var el=byId(reqId);
+    if(el) el.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">'
+      +'<span style="font-size:1rem;">📋</span>'
+      +'<div style="font-size:.76rem;color:var(--text2);">Approval request sent! A Draft 9 admin will review <b>'+h(f.fileName)+'</b> before it appears in chat.</div></div>';
+    pushNotif('📋','Request sent','A Draft 9 admin will review your file.');
+  });
+}
 function showD9AdminPanel(){
   if(!isD9Admin()){ toast('Access denied.'); return; }
+  modal('<div class="modal-title">🛡 Draft 9 Admin</div>'
+    +'<div class="modal-sub">You have full control over the platform.</div>'
+    +'<button class="mbtn" id="m-files" style="margin-top:2px;">📋 Review Flagged Files</button>'
+    +'<button class="mbtn ghost" id="m-users">👥 All Users</button>'
+    +'<button class="mbtn ghost" id="m-servers">🏠 All Servers</button>'
+    +'<button class="mbtn ghost" id="m-broadcast">📢 Broadcast Notification</button>'
+    +'<button class="mbtn ghost" id="m-cancel">Close</button>',
+    function(el){
+      wire2(el,'m-files',    function(){ closeModal(); showPendingFiles(); });
+      wire2(el,'m-users',    function(){ closeModal(); showAllUsers(); });
+      wire2(el,'m-servers',  function(){ closeModal(); showAllServers(); });
+      wire2(el,'m-broadcast',function(){ closeModal(); showBroadcast(); });
+      wire2(el,'m-cancel',closeModal);
+    });
+}
+
+// ── FLAGGED FILES ─────────────────────
+function showPendingFiles(){
   db.collection('d9_pending_files').where('status','==','pending').get().then(function(snap){
     if(snap.empty){
-      modal('<div class="modal-title">🛡 Draft 9 Admin</div>'
-        +'<div class="modal-sub" style="text-align:center;padding:12px 0;">No files pending review ✅</div>'
-        +'<button class="mbtn ghost" id="m-cancel">Close</button>',
-        function(el){ wire2(el,'m-cancel',closeModal); });
+      modal('<div class="modal-title">📋 Flagged Files</div>'
+        +'<div style="text-align:center;padding:16px 0;color:var(--text2);font-size:.8rem;">No files pending review ✅</div>'
+        +'<div class="modal-row"><button class="mbtn ghost" id="m-back">← Back</button></div>',
+        function(el){ wire2(el,'m-back',function(){ closeModal(); showD9AdminPanel(); }); });
       return;
     }
     var rows=snap.docs.map(function(doc){
       var f=doc.data();
-      var safe={url:f.url,fileName:f.fileName,fileSize:f.fileSize,sender:f.sender,senderUid:f.senderUid,senderPfp:f.senderPfp||null,chatType:f.chatType,chatId:f.chatId};
-      var fJson=JSON.stringify(JSON.stringify(safe));
+      var safe=JSON.stringify(JSON.stringify({url:f.url,fileName:f.fileName,fileSize:f.fileSize,sender:f.sender,senderUid:f.senderUid,senderPfp:f.senderPfp||null,chatType:f.chatType,chatId:f.chatId}));
       return '<div class="member-item" style="flex-direction:column;align-items:flex-start;gap:5px;">'
         +'<div style="display:flex;align-items:center;gap:7px;width:100%;">'
         +'<span style="font-size:1.1rem;">'+fileIcon(f.fileName||'')+'</span>'
@@ -652,15 +686,150 @@ function showD9AdminPanel(){
         +'<div class="chat-preview">from <b>'+h(f.sender)+'</b> · '+fmtSize(f.fileSize||0)+' · <span style="color:#ff9500;">'+h(f.ext)+'</span></div>'
         +'</div></div>'
         +'<div style="display:flex;gap:6px;width:100%;">'
-        +'<button class="mini-btn" onclick="reviewFile(\''+doc.id+'\',true,'+fJson+')">✅ Approve</button>'
+        +'<button class="mini-btn" onclick="reviewFile(\''+doc.id+'\',true,'+safe+')">✅ Approve</button>'
         +'<button class="mini-btn danger" onclick="reviewFile(\''+doc.id+'\',false,null)">❌ Deny</button>'
         +'</div></div>';
     }).join('');
-    modal('<div class="modal-title">🛡 Draft 9 Admin — Pending Files ('+snap.docs.length+')</div>'
-      +'<div class="modal-sub">Review flagged files before they appear in chat.</div>'
+    modal('<div class="modal-title">📋 Flagged Files ('+snap.docs.length+')</div>'
       +rows
-      +'<button class="mbtn ghost" id="m-cancel">Close</button>',
-      function(el){ wire2(el,'m-cancel',closeModal); });
+      +'<div class="modal-row"><button class="mbtn ghost" id="m-back">← Back</button></div>',
+      function(el){ wire2(el,'m-back',function(){ closeModal(); showD9AdminPanel(); }); });
+  });
+}
+
+// ── ALL USERS ─────────────────────────
+function showAllUsers(){
+  db.collection('accounts').orderBy('username').get().then(function(snap){
+    var rows=snap.docs.map(function(doc){
+      var u=doc.data();
+      var isBanned=(u.banned===true);
+      var isMe=u.uid===me.uid;
+      var isAdm=D9_ADMINS.includes(u.uid);
+      return '<div class="member-item">'
+        +'<div class="member-av" style="'+(isBanned?'background:#ff6b6b;':'')+'">'+h((u.username||'?')[0].toUpperCase())+'</div>'
+        +'<div class="member-name">'+h(u.username)+(isAdm?' 🛡':'')+(isBanned?' 🚫':'')+'</div>'
+        +(!isMe&&!isAdm?'<div class="member-actions">'
+          +(isBanned
+            ?'<button class="mini-btn" onclick="unbanUser(\''+u.uid+'\',\''+h(u.username)+'\')">Unban</button>'
+            :'<button class="mini-btn danger" onclick="banUser(\''+u.uid+'\',\''+h(u.username)+'\')">Ban</button>')
+          +'</div>':'')
+        +'</div>';
+    }).join('');
+    modal('<div class="modal-title">👥 All Users ('+snap.docs.length+')</div>'
+      +'<div style="max-height:300px;overflow-y:auto;">'+rows+'</div>'
+      +'<div class="modal-row"><button class="mbtn ghost" id="m-back">← Back</button></div>',
+      function(el){ wire2(el,'m-back',function(){ closeModal(); showD9AdminPanel(); }); });
+  });
+}
+
+function banUser(uid,name){
+  if(!confirm('Ban '+name+'? They will not be able to sign in.')) return;
+  db.collection('accounts').doc(uid).update({banned:true}).then(function(){
+    toast(name+' banned.');
+    db.collection('d9_broadcasts').add({message:'You have been banned from Draft 9.',target:uid,ts:fts()});
+    closeModal(); showAllUsers();
+  });
+}
+function unbanUser(uid,name){
+  db.collection('accounts').doc(uid).update({banned:false}).then(function(){
+    toast(name+' unbanned.'); closeModal(); showAllUsers();
+  });
+}
+
+// ── ALL SERVERS ───────────────────────
+function showAllServers(){
+  db.collection('servers').orderBy('name').get().then(function(snap){
+    var rows=snap.docs.map(function(doc){
+      var s=doc.data();
+      return '<div class="member-item">'
+        +'<div class="member-av" style="border-radius:7px;">'+h(s.icon||'🗨️')+'</div>'
+        +'<div class="member-info" style="flex:1;min-width:0;">'
+        +'<div class="member-name">'+h(s.name)+'</div>'
+        +'<div style="font-size:.62rem;color:var(--text3);">'+(s.members?s.members.length:0)+' members · Code: '+h(s.code)+'</div>'
+        +'</div>'
+        +'<div class="member-actions">'
+        +'<button class="mini-btn danger" onclick="adminDeleteServer(\''+doc.id+'\',\''+h(s.name)+'\')">Delete</button>'
+        +'</div></div>';
+    }).join('');
+    modal('<div class="modal-title">🏠 All Servers ('+snap.docs.length+')</div>'
+      +'<div style="max-height:300px;overflow-y:auto;">'+(rows||'<div style="color:var(--text3);font-size:.78rem;padding:8px;">No servers yet</div>')+'</div>'
+      +'<div class="modal-row"><button class="mbtn ghost" id="m-back">← Back</button></div>',
+      function(el){ wire2(el,'m-back',function(){ closeModal(); showD9AdminPanel(); }); });
+  });
+}
+
+function adminDeleteServer(serverId,name){
+  if(!confirm('Delete server "'+name+'"? This removes ALL messages and cannot be undone.')) return;
+  var ref=db.collection('servers').doc(serverId);
+  ref.collection('messages').get().then(function(snap){
+    var batch=db.batch();
+    snap.docs.forEach(function(d){batch.delete(d.ref);});
+    batch.delete(ref);
+    return batch.commit();
+  }).then(function(){
+    toast('"'+name+'" deleted.');
+    if(activeChat&&activeChat.id===serverId){
+      activeChat=null;
+      byId('main-area').innerHTML='<div class="no-chat"><div style="font-size:2rem;">💬</div>Server was deleted.</div>';
+    }
+    closeModal(); showAllServers();
+  });
+}
+
+// ── BROADCAST ─────────────────────────
+function showBroadcast(){
+  modal('<div class="modal-title">📢 Broadcast Notification</div>'
+    +'<div class="modal-sub">Sends a notification to ALL users next time they open Messages.</div>'
+    +'<input class="inp" id="m-msg" placeholder="Your message…" maxlength="200">'
+    +'<div class="err" id="m-err"></div>'
+    +'<div class="modal-row">'
+    +'<button class="mbtn ghost" id="m-back">← Back</button>'
+    +'<button class="mbtn" id="m-ok">📢 Send to All</button>'
+    +'</div>',
+    function(el){
+      wire2(el,'m-back',function(){ closeModal(); showD9AdminPanel(); });
+      wire2(el,'m-ok',function(){
+        var msg=el.querySelector('#m-msg').value.trim();
+        var err=el.querySelector('#m-err');
+        if(!msg){showErr(err,'Enter a message.');return;}
+        db.collection('d9_broadcasts').add({
+          message:msg, target:'all', sentBy:me.name,
+          ts:fts()
+        }).then(function(){
+          closeModal();
+          toast('Broadcast sent to all users!');
+        });
+      });
+    });
+}
+
+// Check for broadcasts on login
+function checkBroadcasts(){
+  var lastCheck=localStorage.getItem('d9msg_last_broadcast')||'0';
+  db.collection('d9_broadcasts')
+    .where('target','==','all')
+    .orderBy('ts','desc').limit(5).get().then(function(snap){
+      snap.docs.forEach(function(doc){
+        var b=doc.data();
+        var ts=b.ts&&b.ts.toDate?b.ts.toDate().getTime():0;
+        if(ts>parseInt(lastCheck)){
+          pushNotif('📢','Draft 9 Admin',b.message);
+        }
+      });
+      localStorage.setItem('d9msg_last_broadcast',Date.now().toString());
+    });
+  // Also check personal bans
+  db.collection('accounts').doc(me.uid).get().then(function(snap){
+    if(snap.exists&&snap.data().banned){
+      localStorage.removeItem('d9msg_session');
+      me=null; hide('app'); show('setup');
+      setTimeout(function(){
+        modal('<div class="modal-title">🚫 Account Banned</div>'
+          +'<div class="modal-sub">Your account has been banned from Draft 9 by an administrator.</div>'
+          +'<button class="mbtn ghost" id="m-ok">OK</button>',
+          function(el){ wire2(el,'m-ok',closeModal); });
+      },200);
+    }
   });
 }
 
