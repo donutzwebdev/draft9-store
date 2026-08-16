@@ -3,7 +3,7 @@
     "id": "calculator",
     "name": "Calculator",
     "icon": "🧮",
-    "description": "A simple calculator.",
+    "description": "A simple calculator with keyboard support.",
     "version": "1.0",
     "type": "html",
     "category": "Utilities",
@@ -14,9 +14,59 @@
     "name": "Messages",
     "icon": "💬",
     "description": "Real-time servers and DMs. Create a server, share the code, chat instantly.",
-    "version": "1.0",
+    "version": "2.0",
     "type": "html",
     "category": "Social",
     "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/messages.html"
+  },
+  {
+    "id": "notes",
+    "name": "Notes",
+    "icon": "📝",
+    "description": "Write and save notes that persist between sessions.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Utilities",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/notes.html"
+  },
+  {
+    "id": "clock",
+    "name": "Clock",
+    "icon": "🕐",
+    "description": "World clock, stopwatch, and countdown timer all in one.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Utilities",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/clock.html"
+  },
+  {
+    "id": "weather",
+    "name": "Weather",
+    "icon": "🌤",
+    "description": "Live weather by city or your current location. 7-day forecast included.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Utilities",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/weather.html"
+  },
+  {
+    "id": "music",
+    "name": "Music Player",
+    "icon": "🎵",
+    "description": "Play music from URLs or local files. Queue, skip, seek, and volume control.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Entertainment",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/music.html"
+  },
+  {
+    "id": "paint",
+    "name": "Paint",
+    "icon": "🎨",
+    "description": "Drawing canvas with pen, brush, eraser, shapes, fill, and undo support.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Creative",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/paint.html"
   }
 ]
