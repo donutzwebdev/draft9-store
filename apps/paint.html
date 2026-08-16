@@ -1,0 +1,163 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Paint</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--accent:#0078d4;--bg:#0d0d1a;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.12);--text:#f3f3f3;--text2:rgba(243,243,243,.65);--font:'Inter',system-ui,sans-serif;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.25);flex-wrap:wrap;flex-shrink:0;}
+.tool-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .13s;}
+.tool-btn:hover{background:rgba(255,255,255,.14);}
+.tool-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
+.size-slider{width:80px;accent-color:var(--accent);}
+.color-inp{width:32px;height:32px;border:none;border-radius:7px;cursor:pointer;padding:2px;background:none;}
+.opacity-slider{width:70px;accent-color:var(--accent);}
+.label{font-size:.62rem;color:var(--text2);}
+.action-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;}
+.action-btn:hover{background:rgba(255,255,255,.12);color:var(--text);}
+.canvas-wrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#1a1a1a;position:relative;}
+canvas{cursor:crosshair;display:block;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.palette{display:flex;gap:4px;flex-wrap:wrap;max-width:160px;}
+.pal-color{width:18px;height:18px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .13s;flex-shrink:0;}
+.pal-color:hover,.pal-color.active{border-color:#fff;transform:scale(1.15);}
+</style></head><body>
+<div class="toolbar">
+  <button class="tool-btn active" id="t-pen" title="Pen" onclick="setTool('pen')">✏️</button>
+  <button class="tool-btn" id="t-brush" title="Brush" onclick="setTool('brush')">🖌️</button>
+  <button class="tool-btn" id="t-eraser" title="Eraser" onclick="setTool('eraser')">🧹</button>
+  <button class="tool-btn" id="t-fill" title="Fill" onclick="setTool('fill')">🪣</button>
+  <button class="tool-btn" id="t-line" title="Line" onclick="setTool('line')">╱</button>
+  <button class="tool-btn" id="t-rect" title="Rectangle" onclick="setTool('rect')">▭</button>
+  <button class="tool-btn" id="t-circle" title="Circle" onclick="setTool('circle')">◯</button>
+  <div class="sep"></div>
+  <span class="label">Size</span>
+  <input type="range" class="size-slider" id="size" min="1" max="60" value="5">
+  <div class="sep"></div>
+  <input type="color" class="color-inp" id="color" value="#ffffff" title="Color">
+  <div class="palette" id="palette"></div>
+  <div class="sep"></div>
+  <span class="label">Opacity</span>
+  <input type="range" class="opacity-slider" id="opacity" min="0.05" max="1" step=".05" value="1">
+  <div class="sep"></div>
+  <button class="action-btn" onclick="clearCanvas()">🗑 Clear</button>
+  <button class="action-btn" onclick="undo()">↩ Undo</button>
+  <button class="action-btn" onclick="downloadCanvas()">⬇ Save</button>
+</div>
+<div class="canvas-wrap" id="wrap">
+  <canvas id="canvas"></canvas>
+</div>
+<script>
+var canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+var wrap=document.getElementById('wrap');
+var tool='pen',drawing=false,lastX=0,lastY=0,snapShot=null;
+var paintHistory=[],maxHistory=30;
+
+var PALETTE=['#ffffff','#000000','#ff5f57','#febc2e','#28c840','#0078d4','#b146c2','#ff69b4','#00cc88','#ff9500','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#64748b','#cbd5e1'];
+
+function initCanvas(){
+  canvas.width=Math.min(wrap.offsetWidth-40,1200);
+  canvas.height=Math.max(wrap.offsetHeight-20,400);
+  ctx.fillStyle='#2a2a2a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  savePaintHistory();
+}
+function buildPalette(){
+  var p=document.getElementById('palette');
+  PALETTE.forEach(function(c){
+    var el=document.createElement('div');
+    el.className='pal-color'; el.style.background=c; el.title=c;
+    el.onclick=function(){document.getElementById('color').value=c;p.querySelectorAll('.pal-color').forEach(function(x){x.classList.remove('active');});el.classList.add('active');};
+    p.appendChild(el);
+  });
+  p.children[0].classList.add('active');
+}
+function setTool(t){
+  tool=t;
+  document.querySelectorAll('.tool-btn').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('t-'+t)?.classList.add('active');
+}
+function getPos(e){
+  var r=canvas.getBoundingClientRect(),pt=e.touches?e.touches[0]:e;
+  return{x:pt.clientX-r.left,y:pt.clientY-r.top};
+}
+function savePaintHistory(){paintHistory.push(canvas.toDataURL());if(paintHistory.length>maxHistory)paintHistory.shift();}
+function undo(){if(paintHistory.length>1){paintHistory.pop();var img=new Image();img.onload=function(){ctx.drawImage(img,0,0);};img.src=paintHistory[paintHistory.length-1];}}
+function clearCanvas(){ctx.fillStyle='#2a2a2a';ctx.fillRect(0,0,canvas.width,canvas.height);savePaintHistory();}
+function downloadCanvas(){var a=document.createElement('a');a.download='paint.png';a.href=canvas.toDataURL();a.click();}
+
+function startDraw(e){
+  e.preventDefault();
+  drawing=true;
+  var p=getPos(e);lastX=p.x;lastY=p.y;
+  if(tool==='fill'){floodFill(Math.round(p.x),Math.round(p.y));return;}
+  if(tool==='line'||tool==='rect'||tool==='circle'){snapShot=ctx.getImageData(0,0,canvas.width,canvas.height);}
+  ctx.beginPath();ctx.moveTo(p.x,p.y);
+}
+function draw(e){
+  e.preventDefault(); if(!drawing) return;
+  var p=getPos(e);
+  var color=document.getElementById('color').value;
+  var size=parseInt(document.getElementById('size').value);
+  var opacity=parseFloat(document.getElementById('opacity').value);
+  ctx.globalAlpha=opacity;
+  if(tool==='eraser'){
+    ctx.globalCompositeOperation='destination-out';
+    ctx.globalAlpha=1;
+    ctx.beginPath();ctx.arc(p.x,p.y,size,0,Math.PI*2);ctx.fill();
+  } else if(tool==='pen'||tool==='brush'){
+    ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=color;
+    ctx.lineWidth=tool==='brush'?size*2:size;
+    ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.lineTo(p.x,p.y);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);
+  } else if(tool==='line'){
+    ctx.putImageData(snapShot,0,0);
+    ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=color;ctx.lineWidth=size;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+  } else if(tool==='rect'){
+    ctx.putImageData(snapShot,0,0);
+    ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=color;ctx.lineWidth=size;
+    ctx.strokeRect(lastX,lastY,p.x-lastX,p.y-lastY);
+  } else if(tool==='circle'){
+    ctx.putImageData(snapShot,0,0);
+    ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=color;ctx.lineWidth=size;
+    var rx=Math.abs(p.x-lastX)/2,ry=Math.abs(p.y-lastY)/2;
+    var cx=lastX+(p.x-lastX)/2,cy=lastY+(p.y-lastY)/2;
+    ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+function endDraw(){if(!drawing)return;drawing=false;ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;savePaintHistory();}
+
+// Flood fill
+function floodFill(sx,sy){
+  var color=document.getElementById('color').value;
+  var data=ctx.getImageData(0,0,canvas.width,canvas.height);
+  var pixels=data.data,w=canvas.width,h=canvas.height;
+  var ti=(sy*w+sx)*4;
+  var tr=pixels[ti],tg=pixels[ti+1],tb=pixels[ti+2],ta=pixels[ti+3];
+  var fr=parseInt(color.slice(1,3),16),fg=parseInt(color.slice(3,5),16),fb=parseInt(color.slice(5,7),16);
+  if(tr===fr&&tg===fg&&tb===fb) return;
+  var stack=[[sx,sy]];
+  while(stack.length){
+    var pos=stack.pop(),x=pos[0],y=pos[1];
+    if(x<0||x>=w||y<0||y>=h) continue;
+    var i=(y*w+x)*4;
+    if(Math.abs(pixels[i]-tr)>30||Math.abs(pixels[i+1]-tg)>30||Math.abs(pixels[i+2]-tb)>30) continue;
+    pixels[i]=fr;pixels[i+1]=fg;pixels[i+2]=fb;pixels[i+3]=255;
+    stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+  }
+  ctx.putImageData(data,0,0);savePaintHistory();
+}
+
+canvas.addEventListener('mousedown',startDraw);
+canvas.addEventListener('mousemove',draw);
+canvas.addEventListener('mouseup',endDraw);
+canvas.addEventListener('mouseleave',endDraw);
+canvas.addEventListener('touchstart',startDraw,{passive:false});
+canvas.addEventListener('touchmove',draw,{passive:false});
+canvas.addEventListener('touchend',endDraw);
+window.addEventListener('resize',function(){var d=canvas.toDataURL();initCanvas();var img=new Image();img.onload=function(){ctx.drawImage(img,0,0);};img.src=d;savePaintHistory();});
+buildPalette();initCanvas();
+</script></body></html>

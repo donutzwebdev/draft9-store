@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Weather</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--accent:#0078d4;--bg:#0d0d1a;--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.12);--border:rgba(255,255,255,.12);--text:#f3f3f3;--text2:rgba(243,243,243,.65);--text3:rgba(243,243,243,.35);--font:'Inter',system-ui,sans-serif;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.search-bar{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--border);}
+.search-inp{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:8px 14px;color:var(--text);font-family:var(--font);font-size:.84rem;outline:none;}
+.search-inp:focus{border-color:var(--accent);}
+.search-btn{background:var(--accent);border:none;border-radius:20px;padding:8px 16px;color:#fff;font-family:var(--font);font-size:.8rem;cursor:pointer;}
+.search-btn:hover{background:#1a8fe3;}
+.content{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;}
+.empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3);font-size:.8rem;text-align:center;}
+.weather-card{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;}
+.w-top{display:flex;align-items:center;gap:14px;}
+.w-icon{font-size:3.5rem;line-height:1;}
+.w-info{flex:1;}
+.w-city{font-size:1.1rem;font-weight:700;}
+.w-country{font-size:.75rem;color:var(--text2);}
+.w-temp{font-size:2.8rem;font-weight:200;line-height:1;}
+.w-desc{font-size:.82rem;color:var(--text2);text-transform:capitalize;margin-top:2px;}
+.w-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.w-stat{background:var(--glass);border-radius:9px;padding:10px;display:flex;flex-direction:column;gap:2px;}
+.w-stat-label{font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.w-stat-val{font-size:.92rem;font-weight:600;}
+.w-forecast{display:flex;gap:8px;overflow-x:auto;}
+.w-day{background:var(--glass);border-radius:9px;padding:10px;text-align:center;flex-shrink:0;min-width:70px;}
+.w-day-name{font-size:.62rem;color:var(--text2);margin-bottom:4px;}
+.w-day-icon{font-size:1.4rem;margin-bottom:4px;}
+.w-day-temp{font-size:.78rem;font-weight:600;}
+.w-day-low{font-size:.66rem;color:var(--text3);}
+.loading{text-align:center;padding:30px;color:var(--text2);font-size:.82rem;}
+.error{text-align:center;padding:20px;color:#ff6b6b;font-size:.8rem;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
+</style></head><body>
+<div class="search-bar">
+  <input class="search-inp" id="city-inp" placeholder="Enter city name…" onkeydown="if(event.key==='Enter') fetchWeather()">
+  <button class="search-btn" onclick="fetchWeather()">Search</button>
+  <button class="search-btn" onclick="geoWeather()" title="Use my location" style="padding:8px 12px;">📍</button>
+</div>
+<div class="content" id="content">
+  <div class="empty"><div style="font-size:3rem;">🌤</div>Search for a city or use your location</div>
+</div>
+<script>
+// Uses Open-Meteo (free, no API key needed) + Geocoding API
+var API_GEO='https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=';
+var API_WX='https://api.open-meteo.com/v1/forecast?current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,apparent_temperature&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7';
+
+var WX_ICONS={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'🌨',75:'❄️',80:'🌦',81:'🌧',82:'🌧',95:'⛈',96:'⛈',99:'⛈'};
+var WX_DESC={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Moderate rain',65:'Heavy rain',71:'Light snow',73:'Moderate snow',75:'Heavy snow',80:'Showers',81:'Heavy showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm with hail',99:'Severe thunderstorm'};
+
+function setContent(html){document.getElementById('content').innerHTML=html;}
+
+function fetchWeather(){
+  var city=document.getElementById('city-inp').value.trim();
+  if(!city) return;
+  setContent('<div class="loading">🌍 Looking up '+city+'…</div>');
+  fetch(API_GEO+encodeURIComponent(city))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.results||!d.results.length){setContent('<div class="error">City not found. Try a different name.</div>');return;}
+      var loc=d.results[0];
+      fetchByCoords(loc.latitude,loc.longitude,loc.name,loc.country);
+    }).catch(function(){setContent('<div class="error">Network error. Check your connection.</div>');});
+}
+
+function geoWeather(){
+  if(!navigator.geolocation){setContent('<div class="error">Geolocation not supported.</div>');return;}
+  setContent('<div class="loading">📍 Getting your location…</div>');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    fetchByCoords(pos.coords.latitude,pos.coords.longitude,'Your Location','');
+  },function(){setContent('<div class="error">Location access denied.</div>');});
+}
+
+function fetchByCoords(lat,lon,city,country){
+  setContent('<div class="loading">🌤 Fetching weather…</div>');
+  fetch(API_WX+'&latitude='+lat+'&longitude='+lon)
+    .then(function(r){return r.json();})
+    .then(function(d){renderWeather(d,city,country);})
+    .catch(function(){setContent('<div class="error">Failed to load weather data.</div>');});
+}
+
+function renderWeather(d,city,country){
+  var c=d.current,daily=d.daily;
+  var code=c.weather_code||0;
+  var icon=WX_ICONS[code]||'🌡';
+  var desc=WX_DESC[code]||'';
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var forecast=daily.time.map(function(t,i){
+    var dc=daily.weather_code[i]||0;
+    return '<div class="w-day">'
+      +'<div class="w-day-name">'+days[new Date(t).getDay()]+'</div>'
+      +'<div class="w-day-icon">'+(WX_ICONS[dc]||'🌡')+'</div>'
+      +'<div class="w-day-temp">'+Math.round(daily.temperature_2m_max[i])+'°</div>'
+      +'<div class="w-day-low">'+Math.round(daily.temperature_2m_min[i])+'°</div>'
+      +'</div>';
+  }).join('');
+  setContent('<div class="weather-card">'
+    +'<div class="w-top">'
+    +'<div class="w-icon">'+icon+'</div>'
+    +'<div class="w-info">'
+    +'<div class="w-city">'+city+'</div>'
+    +'<div class="w-country">'+country+'</div>'
+    +'</div>'
+    +'<div style="text-align:right;">'
+    +'<div class="w-temp">'+Math.round(c.temperature_2m)+'°C</div>'
+    +'<div class="w-desc">'+desc+'</div>'
+    +'</div></div>'
+    +'<div class="w-grid">'
+    +'<div class="w-stat"><div class="w-stat-label">Feels like</div><div class="w-stat-val">'+Math.round(c.apparent_temperature)+'°C</div></div>'
+    +'<div class="w-stat"><div class="w-stat-label">Humidity</div><div class="w-stat-val">'+c.relative_humidity_2m+'%</div></div>'
+    +'<div class="w-stat"><div class="w-stat-label">Wind</div><div class="w-stat-val">'+Math.round(c.wind_speed_10m)+' km/h</div></div>'
+    +'<div class="w-stat"><div class="w-stat-label">Condition</div><div class="w-stat-val" style="font-size:.76rem;">'+desc+'</div></div>'
+    +'</div>'
+    +'<div class="w-forecast">'+forecast+'</div>'
+    +'</div>');
+}
+</script></body></html>
