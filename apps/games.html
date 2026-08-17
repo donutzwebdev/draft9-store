@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Games</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --accent:#0078d4;--accent2:#1a8fe3;
+  --bg:#0d0d1a;--glass:rgba(255,255,255,0.07);--glass2:rgba(255,255,255,0.12);
+  --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.2);
+  --text:#f3f3f3;--text2:rgba(243,243,243,0.65);--text3:rgba(243,243,243,0.35);
+  --font:'Inter',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* HEADER */
+.header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;background:rgba(0,0,0,.2);}
+.header-title{font-size:1rem;font-weight:700;flex:1;}
+.search-inp{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text);font-family:var(--font);font-size:.78rem;outline:none;width:180px;}
+.search-inp:focus{border-color:var(--accent);}
+
+/* CATEGORY TABS */
+.cat-tabs{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+.cat-tab{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:5px 14px;color:var(--text2);font-size:.72rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.cat-tab:hover{background:var(--glass2);color:var(--text);}
+.cat-tab.active{background:var(--accent);border-color:transparent;color:#fff;}
+
+/* GRID */
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px;overflow-y:auto;flex:1;}
+.game-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;}
+.game-card:hover{background:var(--glass2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35);}
+.game-thumb{height:90px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:linear-gradient(135deg,rgba(0,120,212,.12),rgba(0,0,0,.3));}
+.game-info{padding:8px 10px 10px;}
+.game-name{font-size:.78rem;font-weight:700;margin-bottom:2px;}
+.game-cat{font-size:.62rem;color:var(--text3);}
+
+/* VIEWER */
+#viewer{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:100;}
+.viewer-bar{height:42px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;flex-shrink:0;background:rgba(0,0,0,.25);}
+.back-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text);font-size:.76rem;font-family:var(--font);cursor:pointer;transition:all .15s;}
+.back-btn:hover{background:var(--glass2);}
+.viewer-title{font-size:.84rem;font-weight:600;flex:1;}
+.game-frame{flex:1;border:none;width:100%;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">🎮 Games</div>
+  <input class="search-inp" type="text" id="search" placeholder="Search games…" oninput="filterGames(this.value)">
+</div>
+
+<div class="cat-tabs" id="cat-tabs"></div>
+<div class="games-grid" id="games-grid"></div>
+
+<div id="viewer">
+  <div class="viewer-bar">
+    <button class="back-btn" onclick="closeGame()">← Back</button>
+    <div class="viewer-title" id="viewer-title"></div>
+    <button class="back-btn" onclick="reloadGame()">↻ Reload</button>
+  </div>
+  <iframe class="game-frame" id="game-frame" allowfullscreen
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+</div>
+
+<script>
+var GAMES = [
+  // Puzzle
+  {name:'2048',         icon:'🔢', cat:'Puzzle',    url:'https://play2048.co/'},
+  {name:'Wordle',       icon:'📝', cat:'Word',      url:'https://www.nytimes.com/games/wordle/index.html'},
+  {name:'Tetris',       icon:'🟦', cat:'Puzzle',    url:'https://tetris.com/play-tetris'},
+  {name:'Minesweeper',  icon:'💣', cat:'Puzzle',    url:'https://minesweeperonline.com/'},
+  {name:'Sudoku',       icon:'🔣', cat:'Puzzle',    url:'https://sudoku.com/'},
+  {name:'Mahjong',      icon:'🀄', cat:'Puzzle',    url:'https://www.mahjong-on.com/'},
+  // Arcade
+  {name:'Snake',        icon:'🐍', cat:'Arcade',   url:'https://www.google.com/fbx?fbx=snake_arcade'},
+  {name:'Pac-Man',      icon:'👾', cat:'Arcade',   url:'https://www.google.com/logos/2010/pacman10-i.html'},
+  {name:'Flappy Bird',  icon:'🐦', cat:'Arcade',   url:'https://flappybird.io/'},
+  {name:'Dino Run',     icon:'🦕', cat:'Arcade',   url:'https://chromedino.com/'},
+  {name:'Geometry Dash',icon:'🔶', cat:'Arcade',   url:'https://geometrydash.io/'},
+  // Strategy
+  {name:'Chess',        icon:'♟️', cat:'Strategy', url:'https://www.chess.com/play/computer'},
+  {name:'Checkers',     icon:'🔴', cat:'Strategy', url:'https://www.247checkers.com/'},
+  {name:'Battleship',   icon:'🚢', cat:'Strategy', url:'https://www.battleshiponline.org/'},
+  // Idle
+  {name:'Cookie Clicker',icon:'🍪',cat:'Idle',     url:'https://orteil.dashnet.org/cookieclicker/'},
+  {name:'Adventure Cap.',icon:'⚔️', cat:'Idle',    url:'https://www.kongregate.com/games/Playsaurus/clicker-heroes'},
+  // Sports
+  {name:'8 Ball Pool',  icon:'🎱', cat:'Sports',   url:'https://www.coolmathgames.com/0-8-ball-pool'},
+  {name:'Table Tennis', icon:'🏓', cat:'Sports',   url:'https://www.miniclip.com/games/table-tennis/en/'},
+  // Card
+  {name:'Solitaire',    icon:'🃏', cat:'Cards',    url:'https://www.solitaire.org/'},
+  {name:'Spider Solitaire',icon:'🕷',cat:'Cards',  url:'https://spidersolitaire.org/'},
+];
+
+var activeCat = 'All';
+var searchQ   = '';
+
+function getCategories() {
+  var cats = ['All'];
+  GAMES.forEach(function(g){ if(!cats.includes(g.cat)) cats.push(g.cat); });
+  return cats;
+}
+
+function buildCatTabs() {
+  var el = document.getElementById('cat-tabs');
+  el.innerHTML = getCategories().map(function(c){
+    return '<div class="cat-tab'+(c===activeCat?' active':'')+'" onclick="setCat(\''+c+'\')">'+c+'</div>';
+  }).join('');
+}
+
+function setCat(c) {
+  activeCat = c;
+  buildCatTabs();
+  renderGames();
+}
+
+function filterGames(q) {
+  searchQ = q.toLowerCase();
+  renderGames();
+}
+
+function renderGames() {
+  var el = document.getElementById('games-grid');
+  var filtered = GAMES.filter(function(g){
+    var matchCat = activeCat==='All' || g.cat===activeCat;
+    var matchQ   = !searchQ || g.name.toLowerCase().includes(searchQ);
+    return matchCat && matchQ;
+  });
+  if (!filtered.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:.8rem;padding:20px;grid-column:1/-1;text-align:center;">No games found</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(function(g){
+    return '<div class="game-card" onclick="launchGame(\''+g.url.replace(/'/g,"\\'")+'\',' + "'"+g.name+"'" + ')">'
+      +'<div class="game-thumb">'+g.icon+'</div>'
+      +'<div class="game-info">'
+      +'<div class="game-name">'+g.name+'</div>'
+      +'<div class="game-cat">'+g.cat+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function launchGame(url, name) {
+  document.getElementById('viewer').style.display = 'flex';
+  document.getElementById('viewer-title').textContent = name;
+  document.getElementById('game-frame').src = url;
+}
+
+function closeGame() {
+  document.getElementById('viewer').style.display = 'none';
+  document.getElementById('game-frame').src = '';
+}
+
+function reloadGame() {
+  var f = document.getElementById('game-frame');
+  f.src = f.src;
+}
+
+buildCatTabs();
+renderGames();
+</script>
+</body>
+</html>
