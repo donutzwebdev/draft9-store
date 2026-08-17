@@ -68,5 +68,25 @@
     "type": "html",
     "category": "Creative",
     "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/paint.html"
+  },
+  {
+    "id": "games",
+    "name": "Games",
+    "icon": "🎮",
+    "description": "20+ browser games across Arcade, Puzzle, Strategy, Cards and more.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Entertainment",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/games.html"
+  },
+  {
+    "id": "appcreator",
+    "name": "App Creator",
+    "icon": "🛠",
+    "description": "Build your own Draft 9 apps with a live HTML/JS editor and submit them to the store.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Utilities",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/appcreator.html"
   }
 ]
