@@ -88,5 +88,15 @@
     "type": "html",
     "category": "Utilities",
     "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/appcreator.html"
+  },
+  {
+    "id": "products",
+    "name": "Products",
+    "icon": "🖨️",
+    "description": "Order custom 3D printed items. Search MakerWorld models or request something custom.",
+    "version": "1.0",
+    "type": "html",
+    "category": "Utilities",
+    "url": "https://raw.githubusercontent.com/donutzwebdev/draft9-store/main/apps/products.html"
   }
 ]
