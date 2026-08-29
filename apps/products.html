@@ -3,360 +3,205 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Products — 3D Prints</title>
+<title>Products</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --accent:#0078d4;--accent2:#1a8fe3;--bg:#0d0d1a;--bg2:#080812;
+  --accent:#0078d4;--accent2:#1a8fe3;--bg:#0d0d1a;
   --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.12);
   --border:rgba(255,255,255,.12);--border2:rgba(255,255,255,.2);
   --text:#f3f3f3;--text2:rgba(243,243,243,.65);--text3:rgba(243,243,243,.35);
-  --green:#28c840;--orange:#ff9500;--red:#ff5f57;
+  --orange:#ff9500;--green:#28c840;--red:#ff5f57;
   --font:'Inter',system-ui,sans-serif;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
 /* TOPBAR */
-.topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
-.logo{font-size:.95rem;font-weight:700;flex:1;}
-.search-wrap{display:flex;align-items:center;gap:6px;flex:2;}
-.search-inp{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:7px 16px;color:var(--text);font-family:var(--font);font-size:.82rem;outline:none;}
-.search-inp:focus{border-color:var(--accent);}
-.search-btn{background:var(--accent);border:none;border-radius:20px;padding:7px 16px;color:#fff;font-size:.78rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
-.search-btn:hover{background:var(--accent2);}
-.cart-btn{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--text);font-size:.78rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
-.cart-btn:hover{background:var(--glass2);}
-.cart-count{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
-.custom-btn{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);border-radius:8px;padding:7px 14px;color:var(--orange);font-size:.78rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
-.custom-btn:hover{background:rgba(255,149,0,.25);}
+.topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
+.logo{font-size:.92rem;font-weight:700;flex:1;}
+.site-tabs{display:flex;gap:4px;}
+.site-tab{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;transition:all .15s;}
+.site-tab:hover{background:var(--glass2);color:var(--text);}
+.site-tab.active{background:var(--accent);border-color:transparent;color:#fff;}
+.tbtn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
+.tbtn:hover{background:var(--glass2);color:var(--text);}
+.tbtn.orange{background:rgba(255,149,0,.15);border-color:rgba(255,149,0,.3);color:var(--orange);}
+.tbtn.orange:hover{background:rgba(255,149,0,.25);}
 
-/* NOTICE */
-.notice{background:rgba(255,149,0,.08);border-bottom:1px solid rgba(255,149,0,.2);padding:6px 16px;font-size:.7rem;color:var(--orange);flex-shrink:0;}
+/* URL BAR */
+.urlbar{display:flex;align-items:center;gap:6px;padding:6px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);flex-shrink:0;}
+.url-inp{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:5px 14px;color:var(--text);font-family:var(--font);font-size:.78rem;outline:none;}
+.url-inp:focus{border-color:var(--accent);}
+.url-go{background:var(--accent);border:none;border-radius:20px;padding:5px 14px;color:#fff;font-size:.72rem;font-family:var(--font);cursor:pointer;}
+.nav-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text2);font-size:.8rem;cursor:pointer;}
+.nav-btn:hover{background:var(--glass2);}
 
-/* MAIN */
-.main{flex:1;overflow-y:auto;padding:16px;}
-.section-title{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
-.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;}
-.card:hover{background:var(--glass2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35);}
-.card-img{width:100%;height:130px;object-fit:cover;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
-.card-img img{width:100%;height:100%;object-fit:cover;}
-.card-body{padding:10px;}
-.card-name{font-size:.78rem;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.card-creator{font-size:.64rem;color:var(--text3);margin-bottom:6px;}
-.card-meta{display:flex;justify-content:space-between;align-items:center;}
-.card-price{font-size:.82rem;font-weight:700;color:var(--accent);}
-.card-grams{font-size:.62rem;color:var(--text3);}
-.card-add{background:var(--accent);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:.68rem;font-family:var(--font);cursor:pointer;}
-.card-add:hover{background:var(--accent2);}
-.no-license{opacity:.5;cursor:not-allowed;}
+/* BROWSER FRAME */
+.browser-wrap{flex:1;position:relative;overflow:hidden;}
+iframe{width:100%;height:100%;border:none;}
 
-/* STATES */
-.loading{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:60px;color:var(--text2);font-size:.82rem;}
-.spinner{width:28px;height:28px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:60px;color:var(--text3);font-size:.82rem;}
-.error-msg{text-align:center;padding:40px;color:var(--red);font-size:.8rem;}
+/* ORDER BUTTON — floating */
+.order-fab{position:absolute;bottom:20px;right:20px;background:var(--accent);border:none;border-radius:14px;padding:12px 20px;color:#fff;font-size:.84rem;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:0 4px 20px rgba(0,120,212,.5);z-index:50;display:flex;align-items:center;gap:8px;transition:all .18s;}
+.order-fab:hover{background:var(--accent2);transform:scale(1.04);box-shadow:0 6px 24px rgba(0,120,212,.6);}
+.custom-fab{position:absolute;bottom:20px;left:20px;background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.4);border-radius:14px;padding:10px 16px;color:var(--orange);font-size:.78rem;font-weight:700;font-family:var(--font);cursor:pointer;z-index:50;transition:all .18s;}
+.custom-fab:hover{background:rgba(255,149,0,.25);}
+
+/* NOTICE BAR */
+.notice{background:rgba(0,120,212,.08);border-bottom:1px solid rgba(0,120,212,.2);padding:5px 14px;font-size:.68rem;color:var(--accent);flex-shrink:0;display:flex;align-items:center;gap:6px;}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
-.modal{background:rgba(15,15,30,.98);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(480px,95vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 16px 48px rgba(0,0,0,.6);}
-.modal-title{font-size:1rem;font-weight:700;}
-.modal-sub{font-size:.76rem;color:var(--text2);margin-top:-8px;line-height:1.6;}
-.modal-img{width:100%;height:200px;object-fit:cover;border-radius:10px;background:var(--glass);}
-.modal-meta{display:flex;gap:16px;flex-wrap:wrap;}
-.meta-item{display:flex;flex-direction:column;gap:2px;}
-.meta-label{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
-.meta-val{font-size:.84rem;font-weight:600;}
-.modal-price{font-size:1.4rem;font-weight:700;color:var(--accent);}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px);}
+.modal{background:rgba(12,12,26,.98);border:1px solid var(--border2);border-radius:16px;padding:26px;width:min(420px,95vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:13px;box-shadow:0 16px 48px rgba(0,0,0,.7);}
+.modal-title{font-size:.98rem;font-weight:700;}
+.modal-sub{font-size:.74rem;color:var(--text2);margin-top:-7px;line-height:1.6;}
+.inp-label{font-size:.66rem;color:var(--text2);font-weight:600;margin-bottom:3px;}
+.inp{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:.84rem;outline:none;width:100%;}
+.inp:focus{border-color:var(--accent);}
 .modal-row{display:flex;gap:8px;}
-.mbtn{flex:1;background:var(--accent);border:none;border-radius:8px;padding:10px;color:#fff;font-weight:600;font-size:.82rem;cursor:pointer;font-family:var(--font);transition:all .15s;}
+.mbtn{flex:1;background:var(--accent);border:none;border-radius:8px;padding:9px;color:#fff;font-weight:600;font-size:.8rem;cursor:pointer;font-family:var(--font);}
 .mbtn:hover{background:var(--accent2);}
 .mbtn.ghost{background:var(--glass);border:1px solid var(--border);color:var(--text2);}
 .mbtn.ghost:hover{background:var(--glass2);color:var(--text);}
-.mbtn.green{background:rgba(40,200,64,.15);border:1px solid rgba(40,200,64,.3);color:var(--green);}
-.mbtn.green:hover{background:rgba(40,200,64,.25);}
 .mbtn.orange{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);color:var(--orange);}
-.inp{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-family:var(--font);font-size:.86rem;outline:none;width:100%;}
-.inp:focus{border-color:var(--accent);}
-.inp-label{font-size:.68rem;color:var(--text2);font-weight:600;margin-bottom:4px;}
-.merr{font-size:.72rem;color:var(--red);display:none;}
+.merr{font-size:.7rem;color:var(--red);display:none;}
 .merr.show{display:block;}
+.url-preview{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:8px 11px;font-size:.7rem;color:var(--text3);word-break:break-all;font-family:monospace;}
 
-/* CART PANEL */
-.cart-panel{position:fixed;right:0;top:0;bottom:0;width:320px;background:rgba(10,10,20,.98);border-left:1px solid var(--border2);display:flex;flex-direction:column;z-index:90;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.5);}
-.cart-panel.open{transform:none;}
-.cart-header{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.cart-title{font-size:.92rem;font-weight:700;flex:1;}
-.cart-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.1rem;}
-.cart-close:hover{color:var(--text);}
-.cart-items{flex:1;overflow-y:auto;padding:12px;}
-.cart-item{display:flex;gap:10px;padding:10px;background:var(--glass);border-radius:8px;margin-bottom:8px;border:1px solid var(--border);}
-.ci-img{width:50px;height:50px;border-radius:6px;object-fit:cover;background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
-.ci-img img{width:100%;height:100%;object-fit:cover;border-radius:6px;}
-.ci-info{flex:1;min-width:0;}
-.ci-name{font-size:.76rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ci-price{font-size:.72rem;color:var(--accent);font-weight:700;margin-top:2px;}
-.ci-qty{display:flex;align-items:center;gap:6px;margin-top:4px;}
-.qty-btn{background:var(--glass);border:1px solid var(--border);border-radius:4px;width:20px;height:20px;color:var(--text);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;}
-.qty-btn:hover{background:var(--glass2);}
-.ci-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.75rem;align-self:flex-start;}
-.ci-remove:hover{color:var(--red);}
-.cart-footer{padding:14px;border-top:1px solid var(--border);}
-.cart-total{display:flex;justify-content:space-between;font-size:.88rem;font-weight:700;margin-bottom:12px;}
-.cart-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:.8rem;}
-
-/* TOAST */
-#toast{position:fixed;bottom:14px;right:14px;background:rgba(15,15,30,.96);border:1px solid var(--border2);border-radius:9px;padding:9px 14px;font-size:.76rem;box-shadow:0 4px 16px rgba(0,0,0,.5);transform:translateY(8px);opacity:0;transition:all .22s;pointer-events:none;z-index:200;}
-#toast.show{transform:none;opacity:1;}
-
-::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
+#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(12,12,26,.96);border:1px solid var(--border2);border-radius:9px;padding:9px 18px;font-size:.76rem;box-shadow:0 4px 16px rgba(0,0,0,.5);opacity:0;transition:all .22s;pointer-events:none;z-index:300;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 </style>
 </head>
 <body>
 
-<!-- EMAILJS CONFIG — fill these in -->
 <script>
 const EMAILJS_PUBLIC_KEY  = 'dFYBlFg2IgkjJLGV0';
 const EMAILJS_SERVICE_ID  = 'service_ijg7j8g';
 const EMAILJS_TEMPLATE_ID = 'template_1s8n1ll';
-const PRICE_PER_GRAM      = 0.10;
-const STORE_NAME          = '🖨️ Products';
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+var currentUrl = 'https://makerworld.com/en';
+
+var SITES = [
+  { name:'MakerWorld', url:'https://makerworld.com/en', emoji:'🌍' },
+  { name:'Printables', url:'https://www.printables.com', emoji:'🔴' },
+  { name:'Thingiverse', url:'https://www.thingiverse.com', emoji:'📦' },
+  { name:'Cults3D',     url:'https://cults3d.com',         emoji:'✦'  },
+];
 </script>
 
 <div class="topbar">
   <div class="logo">🖨️ Products</div>
-  <div class="search-wrap">
-    <input class="search-inp" id="search-inp" placeholder="Search 3D models e.g. dragon, vase, phone stand…" onkeydown="if(event.key==='Enter') doSearch()">
-    <button class="search-btn" onclick="doSearch()">Search</button>
-  </div>
-  <button class="custom-btn" onclick="showCustomOrder()">✏️ Custom Request</button>
-  <button class="cart-btn" onclick="toggleCart()">🛒 Cart <span class="cart-count" id="cart-count">0</span></button>
+  <div class="site-tabs" id="site-tabs"></div>
+  <button class="tbtn orange" onclick="showCustomOrder()" style="margin-left:auto;">✏️ Custom Request</button>
 </div>
 
-<div class="notice">⚠️ Note: When contacted, if no response is given within 48 hours your order will be automatically cancelled. Always check the model license before ordering.</div>
+<div class="notice">💡 Browse any 3D model site below. When you find something you want printed, hit the <b>Order This Print</b> button!</div>
 
-<div class="main" id="main">
-  <div class="section-title">Search for something to get started!</div>
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:12px;color:var(--text3);text-align:center;">
-    <div style="font-size:3rem;">🖨️</div>
-    <div style="font-size:.9rem;font-weight:600;">Find anything you want 3D printed</div>
-    <div style="font-size:.78rem;max-width:340px;line-height:1.6;">Search for models from MakerWorld. Pricing is $0.10 per gram of filament. Custom requests welcome!</div>
-  </div>
+<div class="urlbar">
+  <button class="nav-btn" onclick="document.getElementById('browser').contentWindow.history.back()">←</button>
+  <button class="nav-btn" onclick="document.getElementById('browser').contentWindow.history.forward()">→</button>
+  <button class="nav-btn" onclick="reloadFrame()">↻</button>
+  <input class="url-inp" id="url-inp" placeholder="Enter URL or search…" onkeydown="if(event.key==='Enter') goUrl()">
+  <button class="url-go" onclick="goUrl()">Go</button>
 </div>
 
-<!-- CART PANEL -->
-<div class="cart-panel" id="cart-panel">
-  <div class="cart-header">
-    <div class="cart-title">🛒 Your Cart</div>
-    <button class="cart-close" onclick="toggleCart()">✕</button>
-  </div>
-  <div class="cart-items" id="cart-items"></div>
-  <div class="cart-footer">
-    <div class="cart-total"><span>Total</span><span id="cart-total">$0.00</span></div>
-    <button class="mbtn" onclick="showCheckout()" id="checkout-btn" disabled>Checkout →</button>
-  </div>
+<div class="browser-wrap">
+  <iframe id="browser" src="https://makerworld.com/en" onload="onFrameLoad()"></iframe>
+  <button class="order-fab" onclick="showOrder()">🛒 Order This Print</button>
+  <button class="custom-fab" onclick="showCustomOrder()">✏️ Custom</button>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ── EMAILJS ──────────────────────────
-emailjs.init(EMAILJS_PUBLIC_KEY);
+// Build site tabs
+var tabsEl = document.getElementById('site-tabs');
+SITES.forEach(function(s, i) {
+  var btn = document.createElement('button');
+  btn.className = 'site-tab' + (i===0?' active':'');
+  btn.textContent = s.emoji + ' ' + s.name;
+  btn.onclick = function() {
+    document.querySelectorAll('.site-tab').forEach(function(t){ t.classList.remove('active'); });
+    btn.classList.add('active');
+    loadUrl(s.url);
+  };
+  tabsEl.appendChild(btn);
+});
 
-// ── STATE ────────────────────────────
-var cart = JSON.parse(localStorage.getItem('d9prints_cart') || '[]');
-var cartOpen = false;
+function loadUrl(url) {
+  if (!url.startsWith('http')) url = 'https://' + url;
+  currentUrl = url;
+  document.getElementById('url-inp').value = url;
+  document.getElementById('browser').src = url;
+}
 
-// ── MAKERWORLD SEARCH ─────────────────
-async function doSearch() {
-  const q = document.getElementById('search-inp').value.trim();
-  if (!q) return;
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching MakerWorld…</div></div>';
+function goUrl() {
+  var v = document.getElementById('url-inp').value.trim();
+  if (!v) return;
+  if (!v.startsWith('http')) v = 'https://' + v;
+  loadUrl(v);
+}
 
+function reloadFrame() {
+  var f = document.getElementById('browser');
+  f.src = f.src;
+}
+
+function onFrameLoad() {
   try {
-    // MakerWorld search via corsproxy
-    const url = 'https://makerworld.com/api/v1/search?keyword=' + encodeURIComponent(q) + '&limit=24&offset=0&sortBy=likes';
-    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-    if (!res.ok) throw new Error('Search failed');
-    const data = await res.json();
-    renderResults(data, q);
-  } catch(e) {
-    // Fallback to Printables API
-    try {
-      const res2 = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.printables.com/graphql/'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: `{ prints(query:"${q}",limit:24,sort:LIKES_COUNT) { items { id name slug firstImage { filePath } category { name } user { publicUsername } printFilesSize summary } } }` })
+    var f = document.getElementById('browser');
+    var url = f.contentWindow.location.href;
+    if (url && url !== 'about:blank') {
+      currentUrl = url;
+      document.getElementById('url-inp').value = url;
+      // Update active tab
+      document.querySelectorAll('.site-tab').forEach(function(t){ t.classList.remove('active'); });
+      SITES.forEach(function(s, i) {
+        if (url.includes(new URL(s.url).hostname)) {
+          document.querySelectorAll('.site-tab')[i]?.classList.add('active');
+        }
       });
-      const d2 = await res2.json();
-      renderPrintablesResults(d2, q);
-    } catch(e2) {
-      main.innerHTML = '<div class="error-msg">⚠️ Could not reach MakerWorld or Printables. Check your connection and try again.</div>';
     }
-  }
+  } catch(e) { /* cross-origin, can't read URL — that's fine */ }
 }
 
-function renderResults(data, q) {
-  const main = document.getElementById('main');
-  const items = data?.hits || data?.data?.modelList?.hits || data?.items || [];
-  if (!items.length) {
-    main.innerHTML = '<div class="empty">No results found for "' + h(q) + '". Try a different search!</div>';
-    return;
-  }
-  main.innerHTML = '<div class="section-title">Results for "' + h(q) + '" — ' + items.length + ' models</div><div class="grid" id="grid"></div>';
-  const grid = document.getElementById('grid');
-  items.forEach(item => {
-    const grams = item.filamentUsed || item.weight || item.filamentWeight || item.printFilesSize || null;
-    const price  = grams ? (grams * PRICE_PER_GRAM).toFixed(2) : null;
-    const img    = item.cover || item.thumbnail || item.firstImage?.filePath || null;
-    const name   = item.title || item.name || 'Untitled';
-    const creator= item.makerName || item.designerName || item.user?.publicUsername || 'Unknown';
-    const id     = item.id || item.objectId;
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = '<div class="card-img">'
-      + (img ? '<img src="' + h(img) + '" alt="" onerror="this.parentNode.textContent=\'🖨️\'">' : '🖨️')
-      + '</div><div class="card-body">'
-      + '<div class="card-name" title="' + h(name) + '">' + h(name) + '</div>'
-      + '<div class="card-creator">by ' + h(creator) + '</div>'
-      + '<div class="card-meta">'
-      + '<div><div class="card-price">' + (price ? '$' + price : 'Get quote') + '</div>'
-      + '<div class="card-grams">' + (grams ? grams + 'g filament' : 'Weight TBD') + '</div></div>'
-      + '<button class="card-add" onclick="event.stopPropagation();addToCart(' + JSON.stringify({id,name,creator,img,grams,price}) + ')">+ Cart</button>'
-      + '</div></div>';
-    card.onclick = () => showDetail({id,name,creator,img,grams,price,item});
-    grid.appendChild(card);
-  });
-}
-
-function renderPrintablesResults(data, q) {
-  const items = data?.data?.prints?.items || [];
-  const mapped = items.map(i => ({
-    id: i.id, name: i.name, creator: i.user?.publicUsername,
-    img: i.firstImage?.filePath ? 'https://media.printables.com/' + i.firstImage.filePath : null,
-    grams: null, price: null
-  }));
-  renderResults({ hits: mapped }, q);
-}
-
-// ── MODEL DETAIL ──────────────────────
-function showDetail(model) {
-  const price = model.grams ? '$' + (model.grams * PRICE_PER_GRAM).toFixed(2) : 'Get quote';
-  modal('<div class="modal-title">' + h(model.name) + '</div>'
-    + '<div class="modal-sub">by ' + h(model.creator) + '</div>'
-    + (model.img ? '<img class="modal-img" src="' + h(model.img) + '" onerror="this.style.display=\'none\'">' : '')
-    + '<div class="modal-meta">'
-    + (model.grams ? '<div class="meta-item"><div class="meta-label">Filament</div><div class="meta-val">' + model.grams + 'g</div></div>' : '')
-    + '<div class="meta-item"><div class="meta-label">Price</div><div class="meta-val modal-price">' + price + '</div></div>'
-    + '</div>'
-    + '<div style="font-size:.68rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 11px;">⚠️ Please verify this model\'s license allows commercial printing before ordering.</div>'
-    + '<div class="modal-row">'
-    + '<button class="mbtn ghost" id="m-cancel">Close</button>'
-    + '<button class="mbtn" id="m-add">🛒 Add to Cart</button>'
-    + '</div>',
-    el => {
-      el.querySelector('#m-cancel').onclick = closeModal;
-      el.querySelector('#m-add').onclick = () => { addToCart(model); closeModal(); };
+// ── ORDER MODAL ───────────────────────
+function showOrder() {
+  var url = currentUrl;
+  modal('<div class="modal-title">🛒 Order This Print</div>'
+    +'<div class="modal-sub">We\'ll print this model and ship it to you. Fill in your details below.</div>'
+    +'<div><div class="inp-label">Model Link</div><div class="url-preview">'+h(url)+'</div></div>'
+    +'<div><div class="inp-label">Your Name *</div><input class="inp" id="o-name" placeholder="Your name"></div>'
+    +'<div><div class="inp-label">Email Address *</div><input class="inp" id="o-email" type="email" placeholder="your@email.com"></div>'
+    +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="o-phone" placeholder="+1 (555) 000-0000"></div>'
+    +'<div><div class="inp-label">Shipping Address *</div><textarea class="inp" id="o-addr" rows="2" placeholder="Street, City, State, ZIP"></textarea></div>'
+    +'<div><div class="inp-label">Color Preference</div><input class="inp" id="o-color" placeholder="e.g. Red, Blue, Black, Any…"></div>'
+    +'<div><div class="inp-label">Special Notes</div><textarea class="inp" id="o-notes" rows="2" placeholder="Quantity, size, anything else…"></textarea></div>'
+    +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 If no response within 48 hours of being contacted, your order will be automatically cancelled.</div>'
+    +'<div class="merr" id="o-err"></div>'
+    +'<div class="modal-row"><button class="mbtn ghost" id="o-cancel">Cancel</button><button class="mbtn" id="o-submit">📧 Place Order</button></div>',
+    function(el) {
+      el.querySelector('#o-cancel').onclick = closeModal;
+      el.querySelector('#o-submit').onclick  = function() { doOrder(url); };
     });
 }
 
-// ── CART ─────────────────────────────
-function addToCart(model) {
-  const existing = cart.find(i => i.id === model.id);
-  if (existing) { existing.qty++; }
-  else { cart.push({ ...model, qty: 1 }); }
-  saveCart(); renderCart(); toast('Added to cart!');
-}
-
-function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); }
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty = Math.max(1, item.qty + delta);
-  saveCart(); renderCart();
-}
-
-function saveCart() {
-  localStorage.setItem('d9prints_cart', JSON.stringify(cart));
-  const count = cart.reduce((a, i) => a + i.qty, 0);
-  const el = document.getElementById('cart-count');
-  if (el) el.textContent = count;
-}
-
-function renderCart() {
-  const el = document.getElementById('cart-items');
-  const total = cart.reduce((a, i) => a + (parseFloat(i.price || 0) * i.qty), 0);
-  const btn = document.getElementById('checkout-btn');
-  document.getElementById('cart-total').textContent = '$' + total.toFixed(2);
-  if (btn) btn.disabled = cart.length === 0;
-  if (!cart.length) { el.innerHTML = '<div class="cart-empty">Your cart is empty</div>'; return; }
-  el.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div class="ci-img">${item.img ? '<img src="' + h(item.img) + '" onerror="this.parentNode.textContent=\'🖨️\'">' : '🖨️'}</div>
-      <div class="ci-info">
-        <div class="ci-name">${h(item.name)}</div>
-        <div class="ci-price">${item.price ? '$' + (parseFloat(item.price) * item.qty).toFixed(2) : 'Quote needed'}</div>
-        <div class="ci-qty">
-          <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
-          <span style="font-size:.76rem;">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
-        </div>
-      </div>
-      <button class="ci-remove" onclick="removeFromCart('${item.id}')">✕</button>
-    </div>`).join('');
-}
-
-function toggleCart() {
-  cartOpen = !cartOpen;
-  document.getElementById('cart-panel').classList.toggle('open', cartOpen);
-}
-
-// ── CHECKOUT ─────────────────────────
-function showCheckout() {
-  const total = cart.reduce((a, i) => a + (parseFloat(i.price || 0) * i.qty), 0);
-  const itemsList = cart.map(i => `• ${i.name} x${i.qty} — ${i.price ? '$' + (parseFloat(i.price)*i.qty).toFixed(2) : 'Quote needed'}`).join('\n');
-  modal('<div class="modal-title">🛒 Checkout</div>'
-    + '<div class="modal-sub">Fill in your details. You\'ll be contacted to confirm your order before printing begins.</div>'
-    + '<div><div class="inp-label">Full Name *</div><input class="inp" id="co-name" placeholder="Your name"></div>'
-    + '<div><div class="inp-label">Email Address *</div><input class="inp" id="co-email" type="email" placeholder="your@email.com"></div>'
-    + '<div><div class="inp-label">Phone Number (optional)</div><input class="inp" id="co-phone" placeholder="+1 (555) 000-0000"></div>'
-    + '<div><div class="inp-label">Shipping Address *</div><textarea class="inp" id="co-addr" rows="2" placeholder="Street, City, State, ZIP"></textarea></div>'
-    + '<div><div class="inp-label">Special Notes</div><textarea class="inp" id="co-notes" rows="2" placeholder="Color preferences, special requests…"></textarea></div>'
-    + '<div style="background:var(--glass);border-radius:8px;padding:10px;font-size:.72rem;line-height:1.8;">'
-    + '<div style="font-weight:700;margin-bottom:4px;">Order Summary</div>'
-    + itemsList.split('\n').map(l => '<div>' + h(l) + '</div>').join('')
-    + '<div style="margin-top:6px;font-weight:700;color:var(--accent);">Total: $' + total.toFixed(2) + (cart.some(i=>!i.price) ? ' + quotes' : '') + '</div>'
-    + '</div>'
-    + '<div style="font-size:.68rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 11px;">📧 If no response is given within 48 hours of being contacted, your order will be automatically cancelled.</div>'
-    + '<div class="merr" id="co-err"></div>'
-    + '<div class="modal-row"><button class="mbtn ghost" id="co-cancel">Cancel</button><button class="mbtn green" id="co-submit">📧 Place Order</button></div>',
-    el => {
-      el.querySelector('#co-cancel').onclick = closeModal;
-      el.querySelector('#co-submit').onclick = doCheckout;
-    });
-}
-
-async function doCheckout() {
-  const name  = document.getElementById('co-name')?.value.trim();
-  const email = document.getElementById('co-email')?.value.trim();
-  const phone = document.getElementById('co-phone')?.value.trim();
-  const addr  = document.getElementById('co-addr')?.value.trim();
-  const notes = document.getElementById('co-notes')?.value.trim();
-  const err   = document.getElementById('co-err');
+async function doOrder(modelUrl) {
+  var name  = document.getElementById('o-name')?.value.trim();
+  var email = document.getElementById('o-email')?.value.trim();
+  var phone = document.getElementById('o-phone')?.value.trim();
+  var addr  = document.getElementById('o-addr')?.value.trim();
+  var color = document.getElementById('o-color')?.value.trim();
+  var notes = document.getElementById('o-notes')?.value.trim();
+  var err   = document.getElementById('o-err');
   err.classList.remove('show');
-  if (!name) { err.textContent='Enter your name.'; err.classList.add('show'); return; }
-  if (!email) { err.textContent='Enter your email.'; err.classList.add('show'); return; }
-  if (!addr) { err.textContent='Enter your shipping address.'; err.classList.add('show'); return; }
+  if (!name)  { err.textContent='Enter your name.';    err.classList.add('show'); return; }
+  if (!email) { err.textContent='Enter your email.';   err.classList.add('show'); return; }
+  if (!addr)  { err.textContent='Enter your address.'; err.classList.add('show'); return; }
 
-  const total = cart.reduce((a, i) => a + (parseFloat(i.price || 0) * i.qty), 0);
-  const itemsList = cart.map(i => `${i.name} x${i.qty} — ${i.price ? '$'+(parseFloat(i.price)*i.qty).toFixed(2) : 'Quote needed'} (${i.grams||'?'}g)`).join('\n');
-
-  const btn = document.getElementById('co-submit');
-  btn.textContent = 'Sending…'; btn.disabled = true;
+  var btn = document.getElementById('o-submit');
+  btn.textContent='Sending…'; btn.disabled=true;
 
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
@@ -365,53 +210,51 @@ async function doCheckout() {
       from_email: email,
       phone:      phone || 'Not provided',
       address:    addr,
-      items:      itemsList,
-      total:      '$' + total.toFixed(2) + (cart.some(i=>!i.price) ? ' + quotes' : ''),
-      notes:      notes || 'None',
+      items:      'Model URL: ' + modelUrl,
+      total:      'Quote needed',
+      notes:      (color ? 'Color: ' + color + '\n' : '') + (notes || 'None'),
       order_date: new Date().toLocaleString()
     });
-    cart = []; saveCart(); renderCart();
     closeModal();
-    toast('✅ Order placed! Check your email for confirmation.');
+    toast('✅ Order placed! We\'ll contact you soon.');
   } catch(e) {
-    err.textContent = 'Failed to send: ' + e.text; err.classList.add('show');
-    btn.textContent = '📧 Place Order'; btn.disabled = false;
+    err.textContent='Send failed: '+(e.text||e.message||'unknown error');
+    err.classList.add('show');
+    btn.textContent='📧 Place Order'; btn.disabled=false;
   }
 }
 
 // ── CUSTOM ORDER ──────────────────────
 function showCustomOrder() {
   modal('<div class="modal-title">✏️ Custom Print Request</div>'
-    + '<div class="modal-sub">Can\'t find what you\'re looking for? Describe what you want and we\'ll make it happen!</div>'
-    + '<div><div class="inp-label">Your Name *</div><input class="inp" id="cu-name" placeholder="Your name"></div>'
-    + '<div><div class="inp-label">Email Address *</div><input class="inp" id="cu-email" type="email" placeholder="your@email.com"></div>'
-    + '<div><div class="inp-label">Phone (optional)</div><input class="inp" id="cu-phone" placeholder="+1 (555) 000-0000"></div>'
-    + '<div><div class="inp-label">Describe your custom item *</div><textarea class="inp" id="cu-desc" rows="3" placeholder="Describe what you want printed. Include size, color, purpose, any reference images/links…"></textarea></div>'
-    + '<div><div class="inp-label">Reference Link (optional)</div><input class="inp" id="cu-link" placeholder="Link to a model, image, or inspiration"></div>'
-    + '<div><div class="inp-label">Special Notes</div><textarea class="inp" id="cu-notes" rows="2" placeholder="Any other details…"></textarea></div>'
-    + '<div style="font-size:.68rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 11px;">📧 We\'ll get back to you with a quote. If no response within 48 hours, the request is cancelled.</div>'
-    + '<div class="merr" id="cu-err"></div>'
-    + '<div class="modal-row"><button class="mbtn ghost" id="cu-cancel">Cancel</button><button class="mbtn orange" id="cu-submit">📧 Send Request</button></div>',
-    el => {
-      el.querySelector('#cu-cancel').onclick = closeModal;
-      el.querySelector('#cu-submit').onclick  = doCustomOrder;
+    +'<div class="modal-sub">Want something specific? Describe it and we\'ll figure it out!</div>'
+    +'<div><div class="inp-label">Your Name *</div><input class="inp" id="c-name" placeholder="Your name"></div>'
+    +'<div><div class="inp-label">Email Address *</div><input class="inp" id="c-email" type="email" placeholder="your@email.com"></div>'
+    +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="c-phone" placeholder="+1 (555) 000-0000"></div>'
+    +'<div><div class="inp-label">Describe your item *</div><textarea class="inp" id="c-desc" rows="3" placeholder="What do you want? Size, color, purpose, any reference links…"></textarea></div>'
+    +'<div><div class="inp-label">Special Notes</div><textarea class="inp" id="c-notes" rows="2" placeholder="Anything else we should know…"></textarea></div>'
+    +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 We\'ll get back to you with a quote. No response within 48 hours = request cancelled.</div>'
+    +'<div class="merr" id="c-err"></div>'
+    +'<div class="modal-row"><button class="mbtn ghost" id="c-cancel">Cancel</button><button class="mbtn orange" id="c-submit">📧 Send Request</button></div>',
+    function(el) {
+      el.querySelector('#c-cancel').onclick = closeModal;
+      el.querySelector('#c-submit').onclick  = doCustom;
     });
 }
 
-async function doCustomOrder() {
-  const name  = document.getElementById('cu-name')?.value.trim();
-  const email = document.getElementById('cu-email')?.value.trim();
-  const phone = document.getElementById('cu-phone')?.value.trim();
-  const desc  = document.getElementById('cu-desc')?.value.trim();
-  const link  = document.getElementById('cu-link')?.value.trim();
-  const notes = document.getElementById('cu-notes')?.value.trim();
-  const err   = document.getElementById('cu-err');
+async function doCustom() {
+  var name  = document.getElementById('c-name')?.value.trim();
+  var email = document.getElementById('c-email')?.value.trim();
+  var phone = document.getElementById('c-phone')?.value.trim();
+  var desc  = document.getElementById('c-desc')?.value.trim();
+  var notes = document.getElementById('c-notes')?.value.trim();
+  var err   = document.getElementById('c-err');
   err.classList.remove('show');
-  if (!name)  { err.textContent='Enter your name.';        err.classList.add('show'); return; }
-  if (!email) { err.textContent='Enter your email.';       err.classList.add('show'); return; }
-  if (!desc)  { err.textContent='Describe your item.';     err.classList.add('show'); return; }
+  if (!name)  { err.textContent='Enter your name.';       err.classList.add('show'); return; }
+  if (!email) { err.textContent='Enter your email.';      err.classList.add('show'); return; }
+  if (!desc)  { err.textContent='Describe your item.';    err.classList.add('show'); return; }
 
-  const btn = document.getElementById('cu-submit');
+  var btn = document.getElementById('c-submit');
   btn.textContent='Sending…'; btn.disabled=true;
 
   try {
@@ -421,39 +264,36 @@ async function doCustomOrder() {
       from_email: email,
       phone:      phone || 'Not provided',
       address:    'N/A — Custom Request',
-      items:      'CUSTOM REQUEST:\n' + desc + (link ? '\nReference: ' + link : ''),
+      items:      'CUSTOM REQUEST:\n' + desc,
       total:      'Quote needed',
       notes:      notes || 'None',
       order_date: new Date().toLocaleString()
     });
     closeModal();
-    toast('✅ Custom request sent! We\'ll get back to you with a quote.');
+    toast('✅ Request sent! We\'ll quote you soon.');
   } catch(e) {
-    err.textContent='Failed to send: '+e.text; err.classList.add('show');
+    err.textContent='Send failed: '+(e.text||e.message||'unknown error');
+    err.classList.add('show');
     btn.textContent='📧 Send Request'; btn.disabled=false;
   }
 }
 
-// ── MODAL UTILS ───────────────────────
+// ── UTILS ─────────────────────────────
 function modal(html, wire) {
   closeModal();
-  const bg = document.createElement('div'); bg.className='modal-bg'; bg.id='modal-bg';
-  const m  = document.createElement('div'); m.className='modal'; m.innerHTML=html;
+  var bg=document.createElement('div'); bg.className='modal-bg'; bg.id='modal-bg';
+  var m=document.createElement('div'); m.className='modal'; m.innerHTML=html;
   bg.appendChild(m); document.body.appendChild(bg);
-  bg.onclick = e => { if(e.target===bg) closeModal(); };
-  if (wire) wire(m);
+  bg.onclick=function(e){ if(e.target===bg) closeModal(); };
+  if(wire) wire(m);
 }
-function closeModal() { document.getElementById('modal-bg')?.remove(); }
-
-var toastT;
-function toast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3000);
-}
+function closeModal(){ document.getElementById('modal-bg')?.remove(); }
 function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// Init
-saveCart(); renderCart();
+var toastT;
+function toast(msg){
+  var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove('show'); },3500);
+}
 </script>
 </body>
 </html>
