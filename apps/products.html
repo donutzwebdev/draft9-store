@@ -83,12 +83,19 @@ emailjs.init(EMAILJS_PUBLIC_KEY);
 var currentUrl = 'https://makerworld.com/en';
 
 var SITES = [
-  { name:'MakerWorld', url:'https://makerworld.com/en', emoji:'🌍' },
-  { name:'Printables', url:'https://www.printables.com', emoji:'🔴' },
-  { name:'Thingiverse', url:'https://www.thingiverse.com', emoji:'📦' },
-  { name:'Cults3D',     url:'https://cults3d.com',         emoji:'✦'  },
+  { name:'MakerWorld', url:'https://makerworld.com/en',      emoji:'🌍' },
+  { name:'Printables', url:'https://www.printables.com',     emoji:'🔴' },
+  { name:'Thingiverse',url:'https://www.thingiverse.com',   emoji:'📦' },
+  { name:'Cults3D',    url:'https://cults3d.com',            emoji:'✦'  },
+  { name:'MyMiniFactory',url:'https://www.myminifactory.com',emoji:'⭐' },
 ];
-</script>
+
+var currentUrl = 'https://makerworld.com/en';
+var PROXY_BASE = 'https://donutzwebdev.github.io/draft9/scramjet/';
+
+function proxyUrl(url) {
+  return PROXY_BASE + encodeURIComponent(url);
+}</script>
 
 <div class="topbar">
   <div class="logo">🖨️ Products</div>
@@ -107,7 +114,7 @@ var SITES = [
 </div>
 
 <div class="browser-wrap">
-  <iframe id="browser" src="https://makerworld.com/en" onload="onFrameLoad()"></iframe>
+  <iframe id="browser" src="https://donutzwebdev.github.io/draft9/scramjet/https%3A%2F%2Fmakerworld.com%2Fen" onload="onFrameLoad()"></iframe>
   <button class="order-fab" onclick="showOrder()">🛒 Order This Print</button>
   <button class="custom-fab" onclick="showCustomOrder()">✏️ Custom</button>
 </div>
@@ -133,7 +140,7 @@ function loadUrl(url) {
   if (!url.startsWith('http')) url = 'https://' + url;
   currentUrl = url;
   document.getElementById('url-inp').value = url;
-  document.getElementById('browser').src = url;
+  document.getElementById('browser').src = proxyUrl(url);
 }
 
 function goUrl() {
@@ -145,7 +152,7 @@ function goUrl() {
 
 function reloadFrame() {
   var f = document.getElementById('browser');
-  f.src = f.src;
+  f.src = proxyUrl(currentUrl);
 }
 
 function onFrameLoad() {
