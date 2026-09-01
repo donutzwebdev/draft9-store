@@ -181,10 +181,9 @@ function onFrameLoad() {
 
 // ── ORDER MODAL ───────────────────────
 function showOrder() {
-  var url = currentUrl;
   modal('<div class="modal-title">🛒 Order This Print</div>'
-    +'<div class="modal-sub">We\'ll print this model and ship it to you. Fill in your details below.</div>'
-    +'<div><div class="inp-label">Model Link</div><div class="url-preview">'+h(url)+'</div></div>'
+    +'<div class="modal-sub">Paste the link to the model you want printed, then fill in your details.</div>'
+    +'<div><div class="inp-label">Model Link * <span style="color:var(--text3);font-weight:400;">(paste from the site)</span></div><input class="inp" id="o-url" placeholder="https://www.thingiverse.com/thing:..." value="'+h(currentUrl)+'"></div>'
     +'<div><div class="inp-label">Your Name *</div><input class="inp" id="o-name" placeholder="Your name"></div>'
     +'<div><div class="inp-label">Email Address *</div><input class="inp" id="o-email" type="email" placeholder="your@email.com"></div>'
     +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="o-phone" placeholder="+1 (555) 000-0000"></div>'
@@ -196,11 +195,12 @@ function showOrder() {
     +'<div class="modal-row"><button class="mbtn ghost" id="o-cancel">Cancel</button><button class="mbtn" id="o-submit">📧 Place Order</button></div>',
     function(el) {
       el.querySelector('#o-cancel').onclick = closeModal;
-      el.querySelector('#o-submit').onclick  = function() { doOrder(url); };
+      el.querySelector('#o-submit').onclick  = doOrder;
     });
 }
 
-async function doOrder(modelUrl) {
+async function doOrder() {
+  var modelUrl = document.getElementById('o-url')?.value.trim();
   var name  = document.getElementById('o-name')?.value.trim();
   var email = document.getElementById('o-email')?.value.trim();
   var phone = document.getElementById('o-phone')?.value.trim();
@@ -209,6 +209,7 @@ async function doOrder(modelUrl) {
   var notes = document.getElementById('o-notes')?.value.trim();
   var err   = document.getElementById('o-err');
   err.classList.remove('show');
+  if (!modelUrl){ err.textContent='Paste the model link.'; err.classList.add('show'); return; }
   if (!name)  { err.textContent='Enter your name.';    err.classList.add('show'); return; }
   if (!email) { err.textContent='Enter your email.';   err.classList.add('show'); return; }
   if (!addr)  { err.textContent='Enter your address.'; err.classList.add('show'); return; }
