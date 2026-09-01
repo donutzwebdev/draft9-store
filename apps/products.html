@@ -36,6 +36,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 .url-go{background:var(--accent);border:none;border-radius:20px;padding:5px 14px;color:#fff;font-size:.72rem;font-family:var(--font);cursor:pointer;}
 .nav-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text2);font-size:.8rem;cursor:pointer;}
 .nav-btn:hover{background:var(--glass2);}
+.current-url{flex:1;background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.2);border-radius:20px;padding:5px 14px;color:var(--accent);font-family:monospace;font-size:.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text;user-select:all;}
+.copy-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
+.copy-btn:hover{background:var(--glass2);color:var(--text);}
 
 /* BROWSER FRAME */
 .browser-wrap{flex:1;position:relative;overflow:hidden;}
@@ -104,8 +107,13 @@ var currentUrl = 'https://www.thingiverse.com';</script>
   <button class="nav-btn" onclick="document.getElementById('browser').contentWindow.history.back()">←</button>
   <button class="nav-btn" onclick="document.getElementById('browser').contentWindow.history.forward()">→</button>
   <button class="nav-btn" onclick="reloadFrame()">↻</button>
-  <input class="url-inp" id="url-inp" placeholder="Enter URL or search…" onkeydown="if(event.key==='Enter') goUrl()">
+  <input class="url-inp" id="url-inp" placeholder="Enter URL…" onkeydown="if(event.key==='Enter') goUrl()">
   <button class="url-go" onclick="goUrl()">Go</button>
+</div>
+<div class="urlbar" style="background:rgba(0,120,212,.05);">
+  <span style="font-size:.66rem;color:var(--text3);white-space:nowrap;">📍 Current page:</span>
+  <div class="current-url" id="current-url-display" onclick="this.select ? this.select() : null">https://www.thingiverse.com</div>
+  <button class="copy-btn" onclick="copyCurrentUrl()">📋 Copy</button>
 </div>
 
 <div class="browser-wrap">
@@ -146,6 +154,7 @@ function loadUrl(url) {
   if (!url.startsWith('http')) url = 'https://' + url;
   currentUrl = url;
   document.getElementById('url-inp').value = url;
+  document.getElementById('current-url-display').textContent = url;
   document.getElementById('browser').src = url;
 }
 
@@ -161,6 +170,11 @@ function reloadFrame() {
   f.src = f.src;
 }
 
+function copyCurrentUrl() {
+  navigator.clipboard.writeText(currentUrl).catch(function(){});
+  toast('📋 URL copied! Paste it into the Order form.');
+}
+
 function onFrameLoad() {
   try {
     var f = document.getElementById('browser');
@@ -168,22 +182,29 @@ function onFrameLoad() {
     if (url && url !== 'about:blank') {
       currentUrl = url;
       document.getElementById('url-inp').value = url;
-      // Update active tab
+      document.getElementById('current-url-display').textContent = url;
       document.querySelectorAll('.site-tab').forEach(function(t){ t.classList.remove('active'); });
       SITES.forEach(function(s, i) {
-        if (url.includes(new URL(s.url).hostname)) {
+        if (!s.tab && url.includes(new URL(s.url).hostname)) {
           document.querySelectorAll('.site-tab')[i]?.classList.add('active');
         }
       });
     }
-  } catch(e) { /* cross-origin, can't read URL — that's fine */ }
+  } catch(e) {
+    // Cross-origin — can't read URL, but that's ok
+    // Try to detect from referrer or just leave as-is
+  }
 }
 
 // ── ORDER MODAL ───────────────────────
 function showOrder() {
   modal('<div class="modal-title">🛒 Order This Print</div>'
     +'<div class="modal-sub">Paste the link to the model you want printed, then fill in your details.</div>'
-    +'<div><div class="inp-label">Model Link * <span style="color:var(--text3);font-weight:400;">(paste from the site)</span></div><input class="inp" id="o-url" placeholder="https://www.thingiverse.com/thing:..." value="'+h(currentUrl)+'"></div>'
+    +'<div><div class="inp-label">Model Link * <span style="color:var(--text3);font-weight:400;">(paste the item URL from the site)</span></div>'
+    +'<div style="display:flex;gap:6px;align-items:center;">'
+    +'<input class="inp" id="o-url" placeholder="https://www.thingiverse.com/thing:..." style="flex:1;">'
+    +'<button class="copy-btn" onclick="document.getElementById(\'o-url\').value=currentUrl;" style="white-space:nowrap;">Use Current</button>'
+    +'</div></div>'
     +'<div><div class="inp-label">Your Name *</div><input class="inp" id="o-name" placeholder="Your name"></div>'
     +'<div><div class="inp-label">Email Address *</div><input class="inp" id="o-email" type="email" placeholder="your@email.com"></div>'
     +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="o-phone" placeholder="+1 (555) 000-0000"></div>'
