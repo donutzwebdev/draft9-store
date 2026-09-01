@@ -122,11 +122,17 @@ var tabsEl = document.getElementById('site-tabs');
 SITES.forEach(function(s, i) {
   var btn = document.createElement('button');
   btn.className = 'site-tab' + (i===0?' active':'');
-  btn.textContent = s.emoji + ' ' + s.name + (s.tab?' ↗':'');
+  btn.textContent = s.emoji + ' ' + s.name;
   btn.onclick = function() {
     if (s.tab) {
-      window.open(s.url, '_blank');
-      toast('Opening ' + s.name + ' in new tab — find a model then come back to order!');
+      // Open in Draft 9 browser via postMessage to parent
+      try {
+        window.top.postMessage({ type:'openBrowser', url: s.url }, '*');
+        toast('Opening ' + s.name + ' in Browser — find a model then come back!');
+      } catch(e) {
+        // Fallback if not inside Draft 9
+        window.open(s.url, '_blank');
+      }
     } else {
       document.querySelectorAll('.site-tab').forEach(function(t){ t.classList.remove('active'); });
       btn.classList.add('active');
