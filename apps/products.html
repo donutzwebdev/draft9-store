@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Products</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -16,48 +16,42 @@
   --font:'Inter',system-ui,sans-serif;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-
-/* TOPBAR */
-.topbar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
-.logo{font-size:.92rem;font-weight:700;flex:1;}
-.site-tabs{display:flex;gap:4px;}
-.site-tab{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;transition:all .15s;}
-.site-tab:hover{background:var(--glass2);color:var(--text);}
-.site-tab.active{background:var(--accent);border-color:transparent;color:#fff;}
-.tbtn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
+.topbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
+.logo{font-size:.92rem;font-weight:700;}
+.search-wrap{display:flex;gap:6px;flex:1;margin:0 10px;}
+.search-inp{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:7px 16px;color:var(--text);font-family:var(--font);font-size:.82rem;outline:none;}
+.search-inp:focus{border-color:var(--accent);}
+.search-btn{background:var(--accent);border:none;border-radius:20px;padding:7px 16px;color:#fff;font-size:.78rem;font-family:var(--font);cursor:pointer;}
+.search-btn:hover{background:var(--accent2);}
+.tbtn{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text2);font-size:.72rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
 .tbtn:hover{background:var(--glass2);color:var(--text);}
-.tbtn.orange{background:rgba(255,149,0,.15);border-color:rgba(255,149,0,.3);color:var(--orange);}
-.tbtn.orange:hover{background:rgba(255,149,0,.25);}
-
-/* URL BAR */
-.urlbar{display:flex;align-items:center;gap:6px;padding:6px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);flex-shrink:0;}
-.url-inp{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:5px 14px;color:var(--text);font-family:var(--font);font-size:.78rem;outline:none;}
-.url-inp:focus{border-color:var(--accent);}
-.url-go{background:var(--accent);border:none;border-radius:20px;padding:5px 14px;color:#fff;font-size:.72rem;font-family:var(--font);cursor:pointer;}
-.nav-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text2);font-size:.8rem;cursor:pointer;}
-.nav-btn:hover{background:var(--glass2);}
-.current-url{flex:1;background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.2);border-radius:20px;padding:5px 14px;color:var(--accent);font-family:monospace;font-size:.72rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text;user-select:all;}
-.copy-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text2);font-size:.7rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
-.copy-btn:hover{background:var(--glass2);color:var(--text);}
-
-/* BROWSER FRAME */
-.browser-wrap{flex:1;position:relative;overflow:hidden;}
-iframe{width:100%;height:100%;border:none;}
-
-/* ORDER BUTTON — floating */
-.order-fab{position:absolute;bottom:20px;right:20px;background:var(--accent);border:none;border-radius:14px;padding:12px 20px;color:#fff;font-size:.84rem;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:0 4px 20px rgba(0,120,212,.5);z-index:50;display:flex;align-items:center;gap:8px;transition:all .18s;}
-.order-fab:hover{background:var(--accent2);transform:scale(1.04);box-shadow:0 6px 24px rgba(0,120,212,.6);}
-.custom-fab{position:absolute;bottom:20px;left:20px;background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.4);border-radius:14px;padding:10px 16px;color:var(--orange);font-size:.78rem;font-weight:700;font-family:var(--font);cursor:pointer;z-index:50;transition:all .18s;}
-.custom-fab:hover{background:rgba(255,149,0,.25);}
-
-/* NOTICE BAR */
-.notice{background:rgba(0,120,212,.08);border-bottom:1px solid rgba(0,120,212,.2);padding:5px 14px;font-size:.68rem;color:var(--accent);flex-shrink:0;display:flex;align-items:center;gap:6px;}
-
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px);}
+.tbtn.orange{background:rgba(255,149,0,.12);border-color:rgba(255,149,0,.3);color:var(--orange);}
+.notice{background:rgba(0,120,212,.07);border-bottom:1px solid rgba(0,120,212,.18);padding:5px 14px;font-size:.68rem;color:var(--accent);flex-shrink:0;}
+.main{flex:1;overflow-y:auto;padding:14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;}
+.card:hover{background:var(--glass2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+.card-img{width:100%;height:130px;object-fit:cover;background:rgba(255,255,255,.04);display:block;}
+.card-img-ph{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:rgba(255,255,255,.03);}
+.card-body{padding:10px;flex:1;display:flex;flex-direction:column;gap:4px;}
+.card-name{font-size:.76rem;font-weight:600;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.card-creator{font-size:.62rem;color:var(--text3);}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px;}
+.card-likes{font-size:.62rem;color:var(--text3);}
+.card-order{background:var(--accent);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:.68rem;font-family:var(--font);cursor:pointer;}
+.card-order:hover{background:var(--accent2);}
+.state{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:60px 20px;color:var(--text3);font-size:.82rem;text-align:center;}
+.spinner{width:28px;height:28px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sort-bar{display:flex;gap:6px;margin-bottom:12px;align-items:center;}
+.sort-label{font-size:.68rem;color:var(--text3);}
+.sort-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text2);font-size:.68rem;font-family:var(--font);cursor:pointer;}
+.sort-btn.active{background:var(--accent);border-color:transparent;color:#fff;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px);}
 .modal{background:rgba(12,12,26,.98);border:1px solid var(--border2);border-radius:16px;padding:26px;width:min(420px,95vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:13px;box-shadow:0 16px 48px rgba(0,0,0,.7);}
 .modal-title{font-size:.98rem;font-weight:700;}
 .modal-sub{font-size:.74rem;color:var(--text2);margin-top:-7px;line-height:1.6;}
+.modal-img{width:100%;height:180px;object-fit:cover;border-radius:10px;}
 .inp-label{font-size:.66rem;color:var(--text2);font-weight:600;margin-bottom:3px;}
 .inp{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:.84rem;outline:none;width:100%;}
 .inp:focus{border-color:var(--accent);}
@@ -69,142 +63,131 @@ iframe{width:100%;height:100%;border:none;}
 .mbtn.orange{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);color:var(--orange);}
 .merr{font-size:.7rem;color:var(--red);display:none;}
 .merr.show{display:block;}
-.url-preview{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:8px 11px;font-size:.7rem;color:var(--text3);word-break:break-all;font-family:monospace;}
-
 #toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(12,12,26,.96);border:1px solid var(--border2);border-radius:9px;padding:9px 18px;font-size:.76rem;box-shadow:0 4px 16px rgba(0,0,0,.5);opacity:0;transition:all .22s;pointer-events:none;z-index:300;white-space:nowrap;}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
 </style>
 </head>
 <body>
-
 <script>
 const EMAILJS_PUBLIC_KEY  = 'dFYBlFg2IgkjJLGV0';
 const EMAILJS_SERVICE_ID  = 'service_ijg7j8g';
 const EMAILJS_TEMPLATE_ID = 'template_1s8n1ll';
+// Get your free token at thingiverse.com/developers
+const THINGIVERSE_TOKEN   = '689975af2e8f87cdacffa5c8f79d0b74';
 emailjs.init(EMAILJS_PUBLIC_KEY);
-
-var currentUrl = 'https://makerworld.com/en';
-
-var SITES = [
-  { name:'Thingiverse',   url:'https://www.thingiverse.com',   emoji:'📦', tab:false },
-  { name:'MakerWorld',    url:'https://makerworld.com/en',     emoji:'🌍', tab:true  },
-  { name:'Printables',    url:'https://www.printables.com',    emoji:'🔴', tab:true  },
-  { name:'Cults3D',       url:'https://cults3d.com',           emoji:'✦',  tab:true  },
-  { name:'MyMiniFactory', url:'https://www.myminifactory.com', emoji:'⭐', tab:true  },
-];
-
-var currentUrl = 'https://www.thingiverse.com';</script>
+</script>
 
 <div class="topbar">
   <div class="logo">🖨️ Products</div>
-  <div class="site-tabs" id="site-tabs"></div>
-  <button class="tbtn orange" onclick="showCustomOrder()" style="margin-left:auto;">✏️ Custom Request</button>
+  <div class="search-wrap">
+    <input class="search-inp" id="search-inp" placeholder="Search 3D models… e.g. dragon, phone stand, vase" onkeydown="if(event.key==='Enter') doSearch()">
+    <button class="search-btn" onclick="doSearch()">Search</button>
+  </div>
+  <button class="tbtn orange" onclick="showCustomOrder()">✏️ Custom</button>
 </div>
-
-<div class="notice">💡 Browse any 3D model site below. When you find something you want printed, hit the <b>Order This Print</b> button!</div>
-
-<div class="urlbar">
-  <button class="nav-btn" onclick="document.getElementById('browser').contentWindow.history.back()">←</button>
-  <button class="nav-btn" onclick="document.getElementById('browser').contentWindow.history.forward()">→</button>
-  <button class="nav-btn" onclick="reloadFrame()">↻</button>
-  <input class="url-inp" id="url-inp" placeholder="Enter URL…" onkeydown="if(event.key==='Enter') goUrl()">
-  <button class="url-go" onclick="goUrl()">Go</button>
+<div class="notice">🖨️ Browse models below — prices are $0.10/gram of filament. Click any model to order!</div>
+<div class="main" id="main">
+  <div class="state">
+    <div style="font-size:3rem;">🖨️</div>
+    <div style="font-weight:600;font-size:.9rem;color:var(--text);">Find anything you want 3D printed</div>
+    <div>Search above to browse thousands of free 3D models</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+      <button class="sort-btn" onclick="quickSearch('dragon')">🐉 Dragon</button>
+      <button class="sort-btn" onclick="quickSearch('phone stand')">📱 Phone Stand</button>
+      <button class="sort-btn" onclick="quickSearch('vase')">🏺 Vase</button>
+      <button class="sort-btn" onclick="quickSearch('puzzle')">🧩 Puzzle</button>
+      <button class="sort-btn" onclick="quickSearch('fidget')">🌀 Fidget</button>
+      <button class="sort-btn" onclick="quickSearch('minecraft')">⛏ Minecraft</button>
+    </div>
+  </div>
 </div>
-<div class="urlbar" style="background:rgba(0,120,212,.05);">
-  <span style="font-size:.66rem;color:var(--text3);white-space:nowrap;">📍 Current page:</span>
-  <div class="current-url" id="current-url-display" onclick="this.select ? this.select() : null">https://www.thingiverse.com</div>
-  <button class="copy-btn" onclick="copyCurrentUrl()">📋 Copy</button>
-</div>
-
-<div class="browser-wrap">
-  <iframe id="browser" src="https://www.thingiverse.com" onload="onFrameLoad()"></iframe>
-  <button class="order-fab" onclick="showOrder()">🛒 Order This Print</button>
-  <button class="custom-fab" onclick="showCustomOrder()">✏️ Custom</button>
-</div>
-
 <div id="toast"></div>
 
 <script>
-// Build site tabs
-var tabsEl = document.getElementById('site-tabs');
-SITES.forEach(function(s, i) {
-  var btn = document.createElement('button');
-  btn.className = 'site-tab' + (i===0?' active':'');
-  btn.textContent = s.emoji + ' ' + s.name;
-  btn.onclick = function() {
-    if (s.tab) {
-      // Open in Draft 9 browser via postMessage to parent
-      try {
-        window.top.postMessage({ type:'openBrowser', url: s.url }, '*');
-        toast('Opening ' + s.name + ' in Browser — find a model then come back!');
-      } catch(e) {
-        // Fallback if not inside Draft 9
-        window.open(s.url, '_blank');
-      }
-    } else {
-      document.querySelectorAll('.site-tab').forEach(function(t){ t.classList.remove('active'); });
-      btn.classList.add('active');
-      loadUrl(s.url);
-    }
-  };
-  tabsEl.appendChild(btn);
-});
+var currentSort = 'popular';
 
-function loadUrl(url) {
-  if (!url.startsWith('http')) url = 'https://' + url;
-  currentUrl = url;
-  document.getElementById('url-inp').value = url;
-  document.getElementById('current-url-display').textContent = url;
-  document.getElementById('browser').src = url;
+function quickSearch(q) {
+  document.getElementById('search-inp').value = q;
+  doSearch();
 }
 
-function goUrl() {
-  var v = document.getElementById('url-inp').value.trim();
-  if (!v) return;
-  if (!v.startsWith('http')) v = 'https://' + v;
-  loadUrl(v);
-}
+async function doSearch() {
+  var q = document.getElementById('search-inp').value.trim();
+  if (!q) return;
+  var main = document.getElementById('main');
+  main.innerHTML = '<div class="state"><div class="spinner"></div><div>Searching for "' + h(q) + '"…</div></div>';
 
-function reloadFrame() {
-  var f = document.getElementById('browser');
-  f.src = f.src;
-}
-
-function copyCurrentUrl() {
-  navigator.clipboard.writeText(currentUrl).catch(function(){});
-  toast('📋 URL copied! Paste it into the Order form.');
-}
-
-function onFrameLoad() {
   try {
-    var f = document.getElementById('browser');
-    var url = f.contentWindow.location.href;
-    if (url && url !== 'about:blank') {
-      currentUrl = url;
-      document.getElementById('url-inp').value = url;
-      document.getElementById('current-url-display').textContent = url;
-      document.querySelectorAll('.site-tab').forEach(function(t){ t.classList.remove('active'); });
-      SITES.forEach(function(s, i) {
-        if (!s.tab && url.includes(new URL(s.url).hostname)) {
-          document.querySelectorAll('.site-tab')[i]?.classList.add('active');
-        }
-      });
-    }
+    var url = 'https://api.thingiverse.com/search/' + encodeURIComponent(q)
+      + '?access_token=' + THINGIVERSE_TOKEN
+      + '&sort=' + currentSort
+      + '&per_page=24&page=1&type=things';
+    var res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+    if (!res.ok) throw new Error('API returned ' + res.status);
+    var data = await res.json();
+    var items = data.hits || data || [];
+    if (!Array.isArray(items)) items = Object.values(items).filter(x => typeof x === 'object');
+    renderResults(items, q);
   } catch(e) {
-    // Cross-origin — can't read URL, but that's ok
-    // Try to detect from referrer or just leave as-is
+    main.innerHTML = '<div class="state"><div style="font-size:2rem;">⚠️</div>'
+      + '<div style="color:var(--red);">Could not load results.</div>'
+      + '<div style="font-size:.74rem;">Make sure your Thingiverse token is set in the app.</div>'
+      + '<button class="sort-btn" onclick="doSearch()" style="margin-top:8px;">Try Again</button></div>';
   }
 }
 
-// ── ORDER MODAL ───────────────────────
-function showOrder() {
+function renderResults(items, q) {
+  var main = document.getElementById('main');
+  if (!items.length) {
+    main.innerHTML = '<div class="state"><div style="font-size:2rem;">🤷</div><div>No results for "' + h(q) + '"</div></div>';
+    return;
+  }
+  var sortBar = '<div class="sort-bar"><span class="sort-label">Sort:</span>'
+    + ['popular','relevant','newest'].map(function(s){
+        return '<button class="sort-btn' + (currentSort===s?' active':'') + '" onclick="currentSort=\'' + s + '\';doSearch();">' + s + '</button>';
+      }).join('') + '</div>';
+
+  main.innerHTML = sortBar + '<div class="grid" id="grid"></div>';
+  var grid = document.getElementById('grid');
+
+  items.forEach(function(item) {
+    var name    = item.name || 'Untitled';
+    var creator = item.creator?.name || item.user?.name || 'Unknown';
+    var img     = item.thumbnail || item.default_image?.url || item.preview_image || null;
+    var likes   = item.like_count || item.likes || 0;
+    var id      = item.id;
+    var url     = 'https://www.thingiverse.com/thing:' + id;
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      (img ? '<img class="card-img" src="' + h(img) + '" alt="" onerror="this.outerHTML=\'<div class=card-img-ph>🖨️</div>\'">'
+           : '<div class="card-img-ph">🖨️</div>')
+      + '<div class="card-body">'
+      + '<div class="card-name">' + h(name) + '</div>'
+      + '<div class="card-creator">by ' + h(creator) + '</div>'
+      + '<div class="card-footer">'
+      + '<div class="card-likes">❤️ ' + likes + '</div>'
+      + '<button class="card-order" onclick="event.stopPropagation();">🛒 Order</button>'
+      + '</div></div>';
+
+    card.querySelector('.card-order').onclick = function(e) {
+      e.stopPropagation();
+      showOrder({ name, creator, img, url, id });
+    };
+    card.onclick = function() { showOrder({ name, creator, img, url, id }); };
+    grid.appendChild(card);
+  });
+}
+
+// ── ORDER ─────────────────────────────
+function showOrder(model) {
   modal('<div class="modal-title">🛒 Order This Print</div>'
-    +'<div class="modal-sub">Paste the link to the model you want printed, then fill in your details.</div>'
-    +'<div><div class="inp-label">Model Link * <span style="color:var(--text3);font-weight:400;">(paste the item URL from the site)</span></div>'
-    +'<div style="display:flex;gap:6px;align-items:center;">'
-    +'<input class="inp" id="o-url" placeholder="https://www.thingiverse.com/thing:..." style="flex:1;">'
-    +'<button class="copy-btn" onclick="document.getElementById(\'o-url\').value=currentUrl;" style="white-space:nowrap;">Use Current</button>'
-    +'</div></div>'
+    +(model.img?'<img class="modal-img" src="'+h(model.img)+'" onerror="this.style.display=\'none\'">':'')
+    +'<div style="font-size:.76rem;font-weight:600;">'+h(model.name)+'</div>'
+    +'<div style="font-size:.68rem;color:var(--text3);">by '+h(model.creator)+'</div>'
+    +'<div style="font-size:.68rem;color:var(--accent);background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.18);border-radius:6px;padding:6px 10px;">🔗 '+h(model.url)+'</div>'
     +'<div><div class="inp-label">Your Name *</div><input class="inp" id="o-name" placeholder="Your name"></div>'
     +'<div><div class="inp-label">Email Address *</div><input class="inp" id="o-email" type="email" placeholder="your@email.com"></div>'
     +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="o-phone" placeholder="+1 (555) 000-0000"></div>'
@@ -214,14 +197,13 @@ function showOrder() {
     +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 If no response within 48 hours of being contacted, your order will be automatically cancelled.</div>'
     +'<div class="merr" id="o-err"></div>'
     +'<div class="modal-row"><button class="mbtn ghost" id="o-cancel">Cancel</button><button class="mbtn" id="o-submit">📧 Place Order</button></div>',
-    function(el) {
+    function(el){
       el.querySelector('#o-cancel').onclick = closeModal;
-      el.querySelector('#o-submit').onclick  = doOrder;
+      el.querySelector('#o-submit').onclick  = function(){ doOrder(model); };
     });
 }
 
-async function doOrder() {
-  var modelUrl = document.getElementById('o-url')?.value.trim();
+async function doOrder(model) {
   var name  = document.getElementById('o-name')?.value.trim();
   var email = document.getElementById('o-email')?.value.trim();
   var phone = document.getElementById('o-phone')?.value.trim();
@@ -230,30 +212,26 @@ async function doOrder() {
   var notes = document.getElementById('o-notes')?.value.trim();
   var err   = document.getElementById('o-err');
   err.classList.remove('show');
-  if (!modelUrl){ err.textContent='Paste the model link.'; err.classList.add('show'); return; }
   if (!name)  { err.textContent='Enter your name.';    err.classList.add('show'); return; }
   if (!email) { err.textContent='Enter your email.';   err.classList.add('show'); return; }
   if (!addr)  { err.textContent='Enter your address.'; err.classList.add('show'); return; }
-
   var btn = document.getElementById('o-submit');
   btn.textContent='Sending…'; btn.disabled=true;
-
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email:   'donutz.web.dev@gmail.com',
       from_name:  name,
       from_email: email,
-      phone:      phone || 'Not provided',
+      phone:      phone||'Not provided',
       address:    addr,
-      items:      'Model URL: ' + modelUrl,
+      items:      model.name+'\nThingiverse: '+model.url,
       total:      'Quote needed',
-      notes:      (color ? 'Color: ' + color + '\n' : '') + (notes || 'None'),
+      notes:      (color?'Color: '+color+'\n':'')+(notes||'None'),
       order_date: new Date().toLocaleString()
     });
-    closeModal();
-    toast('✅ Order placed! We\'ll contact you soon.');
+    closeModal(); toast('✅ Order placed! We\'ll contact you soon.');
   } catch(e) {
-    err.textContent='Send failed: '+(e.text||e.message||'unknown error');
+    err.textContent='Send failed: '+(e.text||e.message||'error');
     err.classList.add('show');
     btn.textContent='📧 Place Order'; btn.disabled=false;
   }
@@ -262,16 +240,16 @@ async function doOrder() {
 // ── CUSTOM ORDER ──────────────────────
 function showCustomOrder() {
   modal('<div class="modal-title">✏️ Custom Print Request</div>'
-    +'<div class="modal-sub">Want something specific? Describe it and we\'ll figure it out!</div>'
+    +'<div class="modal-sub">Want something specific? Describe it and we\'ll make it happen!</div>'
     +'<div><div class="inp-label">Your Name *</div><input class="inp" id="c-name" placeholder="Your name"></div>'
     +'<div><div class="inp-label">Email Address *</div><input class="inp" id="c-email" type="email" placeholder="your@email.com"></div>'
     +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="c-phone" placeholder="+1 (555) 000-0000"></div>'
-    +'<div><div class="inp-label">Describe your item *</div><textarea class="inp" id="c-desc" rows="3" placeholder="What do you want? Size, color, purpose, any reference links…"></textarea></div>'
-    +'<div><div class="inp-label">Special Notes</div><textarea class="inp" id="c-notes" rows="2" placeholder="Anything else we should know…"></textarea></div>'
-    +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 We\'ll get back to you with a quote. No response within 48 hours = request cancelled.</div>'
+    +'<div><div class="inp-label">Describe your item *</div><textarea class="inp" id="c-desc" rows="3" placeholder="What do you want printed? Size, color, purpose, any links…"></textarea></div>'
+    +'<div><div class="inp-label">Special Notes</div><textarea class="inp" id="c-notes" rows="2" placeholder="Anything else…"></textarea></div>'
+    +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 We\'ll get back to you with a quote. No response in 48hrs = cancelled.</div>'
     +'<div class="merr" id="c-err"></div>'
     +'<div class="modal-row"><button class="mbtn ghost" id="c-cancel">Cancel</button><button class="mbtn orange" id="c-submit">📧 Send Request</button></div>',
-    function(el) {
+    function(el){
       el.querySelector('#c-cancel').onclick = closeModal;
       el.querySelector('#c-submit').onclick  = doCustom;
     });
@@ -285,50 +263,41 @@ async function doCustom() {
   var notes = document.getElementById('c-notes')?.value.trim();
   var err   = document.getElementById('c-err');
   err.classList.remove('show');
-  if (!name)  { err.textContent='Enter your name.';       err.classList.add('show'); return; }
-  if (!email) { err.textContent='Enter your email.';      err.classList.add('show'); return; }
-  if (!desc)  { err.textContent='Describe your item.';    err.classList.add('show'); return; }
-
-  var btn = document.getElementById('c-submit');
-  btn.textContent='Sending…'; btn.disabled=true;
-
+  if (!name)  { err.textContent='Enter your name.';    err.classList.add('show'); return; }
+  if (!email) { err.textContent='Enter your email.';   err.classList.add('show'); return; }
+  if (!desc)  { err.textContent='Describe your item.'; err.classList.add('show'); return; }
+  var btn=document.getElementById('c-submit'); btn.textContent='Sending…'; btn.disabled=true;
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email:   'donutz.web.dev@gmail.com',
-      from_name:  name,
-      from_email: email,
-      phone:      phone || 'Not provided',
+      from_name:  name, from_email: email,
+      phone:      phone||'Not provided',
       address:    'N/A — Custom Request',
-      items:      'CUSTOM REQUEST:\n' + desc,
+      items:      'CUSTOM: '+desc,
       total:      'Quote needed',
-      notes:      notes || 'None',
+      notes:      notes||'None',
       order_date: new Date().toLocaleString()
     });
-    closeModal();
-    toast('✅ Request sent! We\'ll quote you soon.');
+    closeModal(); toast('✅ Request sent! We\'ll quote you soon.');
   } catch(e) {
-    err.textContent='Send failed: '+(e.text||e.message||'unknown error');
+    err.textContent='Send failed: '+(e.text||e.message||'error');
     err.classList.add('show');
     btn.textContent='📧 Send Request'; btn.disabled=false;
   }
 }
 
-// ── UTILS ─────────────────────────────
-function modal(html, wire) {
+function modal(html,wire){
   closeModal();
-  var bg=document.createElement('div'); bg.className='modal-bg'; bg.id='modal-bg';
-  var m=document.createElement('div'); m.className='modal'; m.innerHTML=html;
-  bg.appendChild(m); document.body.appendChild(bg);
-  bg.onclick=function(e){ if(e.target===bg) closeModal(); };
-  if(wire) wire(m);
+  var bg=document.createElement('div');bg.className='modal-bg';bg.id='modal-bg';
+  var m=document.createElement('div');m.className='modal';m.innerHTML=html;
+  bg.appendChild(m);document.body.appendChild(bg);
+  bg.onclick=function(e){if(e.target===bg)closeModal();};
+  if(wire)wire(m);
 }
-function closeModal(){ document.getElementById('modal-bg')?.remove(); }
-function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function closeModal(){document.getElementById('modal-bg')?.remove();}
+function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var toastT;
-function toast(msg){
-  var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove('show'); },3500);
-}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},3500);}
 </script>
 </body>
 </html>
