@@ -123,9 +123,11 @@ async function doSearch() {
       + '?access_token=' + THINGIVERSE_TOKEN
       + '&sort=' + currentSort
       + '&per_page=24&page=1&type=things';
-    var res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+    var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    var res = await fetch(proxyUrl);
     if (!res.ok) throw new Error('API returned ' + res.status);
-    var data = await res.json();
+    var wrapper = await res.json();
+    var data = JSON.parse(wrapper.contents);
     var items = data.hits || data || [];
     if (!Array.isArray(items)) items = Object.values(items).filter(x => typeof x === 'object');
     renderResults(items, q);
