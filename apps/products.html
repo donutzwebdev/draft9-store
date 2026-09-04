@@ -122,13 +122,21 @@ async function doSearch() {
     var url = 'https://api.thingiverse.com/search/' + encodeURIComponent(q)
       + '?access_token=' + THINGIVERSE_TOKEN
       + '&sort=' + currentSort
-      + '&per_page=24&page=1&type=things';
-    var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-    var res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error('API returned ' + res.status);
-    var wrapper = await res.json();
-    var data = JSON.parse(wrapper.contents);
-    var items = data.hits || data || [];
+      + '&per_page=12&page=1&type=things';
+    // Try direct fetch first (works if CORS is open)
+    var data, items;
+    try {
+      var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + THINGIVERSE_TOKEN } });
+      if (res.ok) { data = await res.json(); }
+    } catch(e) {}
+    // Fallback to proxy
+    if (!data) {
+      var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      var res2 = await fetch(proxyUrl);
+      if (!res2.ok) throw new Error('API returned ' + res2.status);
+      data = await res2.json();
+    }
+    items = Array.isArray(data) ? data : (data.hits || data.results || []);
     if (!Array.isArray(items)) items = Object.values(items).filter(x => typeof x === 'object');
     renderResults(items, q);
   } catch(e) {
