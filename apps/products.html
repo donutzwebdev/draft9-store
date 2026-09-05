@@ -2,458 +2,312 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Products — 3D Prints</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Products</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --accent:#0078d4;--accent2:#1a8fe3;--bg:#0d0d1a;--bg2:#080812;
+  --accent:#0078d4;--accent2:#1a8fe3;--bg:#0d0d1a;
   --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.12);
   --border:rgba(255,255,255,.12);--border2:rgba(255,255,255,.2);
   --text:#f3f3f3;--text2:rgba(243,243,243,.65);--text3:rgba(243,243,243,.35);
-  --green:#28c840;--orange:#ff9500;--red:#ff5f57;
+  --orange:#ff9500;--green:#28c840;--red:#ff5f57;
   --font:'Inter',system-ui,sans-serif;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-
-/* TOPBAR */
-.topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
-.logo{font-size:.95rem;font-weight:700;flex:1;}
-.search-wrap{display:flex;align-items:center;gap:6px;flex:2;}
+.topbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
+.logo{font-size:.92rem;font-weight:700;}
+.search-wrap{display:flex;gap:6px;flex:1;margin:0 10px;}
 .search-inp{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:7px 16px;color:var(--text);font-family:var(--font);font-size:.82rem;outline:none;}
 .search-inp:focus{border-color:var(--accent);}
-.search-btn{background:var(--accent);border:none;border-radius:20px;padding:7px 16px;color:#fff;font-size:.78rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
+.search-btn{background:var(--accent);border:none;border-radius:20px;padding:7px 16px;color:#fff;font-size:.78rem;font-family:var(--font);cursor:pointer;}
 .search-btn:hover{background:var(--accent2);}
-.cart-btn{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--text);font-size:.78rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
-.cart-btn:hover{background:var(--glass2);}
-.cart-count{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
-.custom-btn{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);border-radius:8px;padding:7px 14px;color:var(--orange);font-size:.78rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
-.custom-btn:hover{background:rgba(255,149,0,.25);}
-
-/* NOTICE */
-.notice{background:rgba(255,149,0,.08);border-bottom:1px solid rgba(255,149,0,.2);padding:6px 16px;font-size:.7rem;color:var(--orange);flex-shrink:0;}
-
-/* MAIN */
-.main{flex:1;overflow-y:auto;padding:16px;}
-.section-title{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+.tbtn{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text2);font-size:.72rem;font-family:var(--font);cursor:pointer;white-space:nowrap;}
+.tbtn:hover{background:var(--glass2);color:var(--text);}
+.tbtn.orange{background:rgba(255,149,0,.12);border-color:rgba(255,149,0,.3);color:var(--orange);}
+.notice{background:rgba(0,120,212,.07);border-bottom:1px solid rgba(0,120,212,.18);padding:5px 14px;font-size:.68rem;color:var(--accent);flex-shrink:0;}
+.main{flex:1;overflow-y:auto;padding:14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
 .card{background:var(--glass);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;}
-.card:hover{background:var(--glass2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35);}
-.card-img{width:100%;height:130px;object-fit:cover;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
-.card-img img{width:100%;height:100%;object-fit:cover;}
-.card-body{padding:10px;}
-.card-name{font-size:.78rem;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.card-creator{font-size:.64rem;color:var(--text3);margin-bottom:6px;}
-.card-meta{display:flex;justify-content:space-between;align-items:center;}
-.card-price{font-size:.82rem;font-weight:700;color:var(--accent);}
-.card-grams{font-size:.62rem;color:var(--text3);}
-.card-add{background:var(--accent);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:.68rem;font-family:var(--font);cursor:pointer;}
-.card-add:hover{background:var(--accent2);}
-.no-license{opacity:.5;cursor:not-allowed;}
-
-/* STATES */
-.loading{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:60px;color:var(--text2);font-size:.82rem;}
+.card:hover{background:var(--glass2);border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+.card-img{width:100%;height:130px;object-fit:cover;background:rgba(255,255,255,.04);display:block;}
+.card-img-ph{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:rgba(255,255,255,.03);}
+.card-body{padding:10px;flex:1;display:flex;flex-direction:column;gap:4px;}
+.card-name{font-size:.76rem;font-weight:600;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.card-creator{font-size:.62rem;color:var(--text3);}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px;}
+.card-likes{font-size:.62rem;color:var(--text3);}
+.card-order{background:var(--accent);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:.68rem;font-family:var(--font);cursor:pointer;}
+.card-order:hover{background:var(--accent2);}
+.state{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:60px 20px;color:var(--text3);font-size:.82rem;text-align:center;}
 .spinner{width:28px;height:28px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.empty{text-align:center;padding:60px;color:var(--text3);font-size:.82rem;}
-.error-msg{text-align:center;padding:40px;color:var(--red);font-size:.8rem;}
-
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
-.modal{background:rgba(15,15,30,.98);border:1px solid var(--border2);border-radius:16px;padding:28px;width:min(480px,95vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 16px 48px rgba(0,0,0,.6);}
-.modal-title{font-size:1rem;font-weight:700;}
-.modal-sub{font-size:.76rem;color:var(--text2);margin-top:-8px;line-height:1.6;}
-.modal-img{width:100%;height:200px;object-fit:cover;border-radius:10px;background:var(--glass);}
-.modal-meta{display:flex;gap:16px;flex-wrap:wrap;}
-.meta-item{display:flex;flex-direction:column;gap:2px;}
-.meta-label{font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
-.meta-val{font-size:.84rem;font-weight:600;}
-.modal-price{font-size:1.4rem;font-weight:700;color:var(--accent);}
+.sort-bar{display:flex;gap:6px;margin-bottom:12px;align-items:center;}
+.sort-label{font-size:.68rem;color:var(--text3);}
+.sort-btn{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text2);font-size:.68rem;font-family:var(--font);cursor:pointer;}
+.sort-btn.active{background:var(--accent);border-color:transparent;color:#fff;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px);}
+.modal{background:rgba(12,12,26,.98);border:1px solid var(--border2);border-radius:16px;padding:26px;width:min(420px,95vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:13px;box-shadow:0 16px 48px rgba(0,0,0,.7);}
+.modal-title{font-size:.98rem;font-weight:700;}
+.modal-sub{font-size:.74rem;color:var(--text2);margin-top:-7px;line-height:1.6;}
+.modal-img{width:100%;height:180px;object-fit:cover;border-radius:10px;}
+.inp-label{font-size:.66rem;color:var(--text2);font-weight:600;margin-bottom:3px;}
+.inp{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font);font-size:.84rem;outline:none;width:100%;}
+.inp:focus{border-color:var(--accent);}
 .modal-row{display:flex;gap:8px;}
-.mbtn{flex:1;background:var(--accent);border:none;border-radius:8px;padding:10px;color:#fff;font-weight:600;font-size:.82rem;cursor:pointer;font-family:var(--font);transition:all .15s;}
+.mbtn{flex:1;background:var(--accent);border:none;border-radius:8px;padding:9px;color:#fff;font-weight:600;font-size:.8rem;cursor:pointer;font-family:var(--font);}
 .mbtn:hover{background:var(--accent2);}
 .mbtn.ghost{background:var(--glass);border:1px solid var(--border);color:var(--text2);}
 .mbtn.ghost:hover{background:var(--glass2);color:var(--text);}
-.mbtn.green{background:rgba(40,200,64,.15);border:1px solid rgba(40,200,64,.3);color:var(--green);}
-.mbtn.green:hover{background:rgba(40,200,64,.25);}
 .mbtn.orange{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);color:var(--orange);}
-.inp{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-family:var(--font);font-size:.86rem;outline:none;width:100%;}
-.inp:focus{border-color:var(--accent);}
-.inp-label{font-size:.68rem;color:var(--text2);font-weight:600;margin-bottom:4px;}
-.merr{font-size:.72rem;color:var(--red);display:none;}
+.merr{font-size:.7rem;color:var(--red);display:none;}
 .merr.show{display:block;}
-
-/* CART PANEL */
-.cart-panel{position:fixed;right:0;top:0;bottom:0;width:320px;background:rgba(10,10,20,.98);border-left:1px solid var(--border2);display:flex;flex-direction:column;z-index:90;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.5);}
-.cart-panel.open{transform:none;}
-.cart-header{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.cart-title{font-size:.92rem;font-weight:700;flex:1;}
-.cart-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.1rem;}
-.cart-close:hover{color:var(--text);}
-.cart-items{flex:1;overflow-y:auto;padding:12px;}
-.cart-item{display:flex;gap:10px;padding:10px;background:var(--glass);border-radius:8px;margin-bottom:8px;border:1px solid var(--border);}
-.ci-img{width:50px;height:50px;border-radius:6px;object-fit:cover;background:rgba(255,255,255,.04);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
-.ci-img img{width:100%;height:100%;object-fit:cover;border-radius:6px;}
-.ci-info{flex:1;min-width:0;}
-.ci-name{font-size:.76rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ci-price{font-size:.72rem;color:var(--accent);font-weight:700;margin-top:2px;}
-.ci-qty{display:flex;align-items:center;gap:6px;margin-top:4px;}
-.qty-btn{background:var(--glass);border:1px solid var(--border);border-radius:4px;width:20px;height:20px;color:var(--text);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;}
-.qty-btn:hover{background:var(--glass2);}
-.ci-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.75rem;align-self:flex-start;}
-.ci-remove:hover{color:var(--red);}
-.cart-footer{padding:14px;border-top:1px solid var(--border);}
-.cart-total{display:flex;justify-content:space-between;font-size:.88rem;font-weight:700;margin-bottom:12px;}
-.cart-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:.8rem;}
-
-/* TOAST */
-#toast{position:fixed;bottom:14px;right:14px;background:rgba(15,15,30,.96);border:1px solid var(--border2);border-radius:9px;padding:9px 14px;font-size:.76rem;box-shadow:0 4px 16px rgba(0,0,0,.5);transform:translateY(8px);opacity:0;transition:all .22s;pointer-events:none;z-index:200;}
-#toast.show{transform:none;opacity:1;}
-
+#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(12,12,26,.96);border:1px solid var(--border2);border-radius:9px;padding:9px 18px;font-size:.76rem;box-shadow:0 4px 16px rgba(0,0,0,.5);opacity:0;transition:all .22s;pointer-events:none;z-index:300;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px;}
 </style>
 </head>
 <body>
-
-<!-- EMAILJS CONFIG — fill these in -->
 <script>
 const EMAILJS_PUBLIC_KEY  = 'dFYBlFg2IgkjJLGV0';
 const EMAILJS_SERVICE_ID  = 'service_ijg7j8g';
 const EMAILJS_TEMPLATE_ID = 'template_1s8n1ll';
-const PRICE_PER_GRAM      = 0.10;
-const STORE_NAME          = '🖨️ Products';
+// Get your free token at thingiverse.com/developers
+const THINGIVERSE_TOKEN   = '689975af2e8f87cdacffa5c8f79d0b74';
+emailjs.init(EMAILJS_PUBLIC_KEY);
 </script>
 
 <div class="topbar">
   <div class="logo">🖨️ Products</div>
   <div class="search-wrap">
-    <input class="search-inp" id="search-inp" placeholder="Search 3D models e.g. dragon, vase, phone stand…" onkeydown="if(event.key==='Enter') doSearch()">
+    <input class="search-inp" id="search-inp" placeholder="Search 3D models… e.g. dragon, phone stand, vase" onkeydown="if(event.key==='Enter') doSearch()">
     <button class="search-btn" onclick="doSearch()">Search</button>
   </div>
-  <button class="custom-btn" onclick="showCustomOrder()">✏️ Custom Request</button>
-  <button class="cart-btn" onclick="toggleCart()">🛒 Cart <span class="cart-count" id="cart-count">0</span></button>
+  <button class="tbtn orange" onclick="showCustomOrder()">✏️ Custom</button>
 </div>
-
-<div class="notice">⚠️ Note: When contacted, if no response is given within 48 hours your order will be automatically cancelled. Always check the model license before ordering.</div>
-
+<div class="notice">🖨️ Browse models below — prices are $0.10/gram of filament. Click any model to order!</div>
 <div class="main" id="main">
-  <div class="section-title">Search for something to get started!</div>
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:12px;color:var(--text3);text-align:center;">
+  <div class="state">
     <div style="font-size:3rem;">🖨️</div>
-    <div style="font-size:.9rem;font-weight:600;">Find anything you want 3D printed</div>
-    <div style="font-size:.78rem;max-width:340px;line-height:1.6;">Search for models from MakerWorld. Pricing is $0.10 per gram of filament. Custom requests welcome!</div>
+    <div style="font-weight:600;font-size:.9rem;color:var(--text);">Find anything you want 3D printed</div>
+    <div>Search above to browse thousands of free 3D models</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+      <button class="sort-btn" onclick="quickSearch('dragon')">🐉 Dragon</button>
+      <button class="sort-btn" onclick="quickSearch('phone stand')">📱 Phone Stand</button>
+      <button class="sort-btn" onclick="quickSearch('vase')">🏺 Vase</button>
+      <button class="sort-btn" onclick="quickSearch('puzzle')">🧩 Puzzle</button>
+      <button class="sort-btn" onclick="quickSearch('fidget')">🌀 Fidget</button>
+      <button class="sort-btn" onclick="quickSearch('minecraft')">⛏ Minecraft</button>
+    </div>
   </div>
 </div>
-
-<!-- CART PANEL -->
-<div class="cart-panel" id="cart-panel">
-  <div class="cart-header">
-    <div class="cart-title">🛒 Your Cart</div>
-    <button class="cart-close" onclick="toggleCart()">✕</button>
-  </div>
-  <div class="cart-items" id="cart-items"></div>
-  <div class="cart-footer">
-    <div class="cart-total"><span>Total</span><span id="cart-total">$0.00</span></div>
-    <button class="mbtn" onclick="showCheckout()" id="checkout-btn" disabled>Checkout →</button>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script>
-// ── EMAILJS ──────────────────────────
-emailjs.init(EMAILJS_PUBLIC_KEY);
+var currentSort = 'popular';
 
-// ── STATE ────────────────────────────
-var cart = JSON.parse(localStorage.getItem('d9prints_cart') || '[]');
-var cartOpen = false;
+function quickSearch(q) {
+  document.getElementById('search-inp').value = q;
+  doSearch();
+}
 
-// ── MAKERWORLD SEARCH ─────────────────
 async function doSearch() {
-  const q = document.getElementById('search-inp').value.trim();
+  var q = document.getElementById('search-inp').value.trim();
   if (!q) return;
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching MakerWorld…</div></div>';
+  var main = document.getElementById('main');
+  main.innerHTML = '<div class="state"><div class="spinner"></div><div>Searching for "' + h(q) + '"…</div></div>';
 
   try {
-    // MakerWorld search via corsproxy
-    const url = 'https://makerworld.com/api/v1/search?keyword=' + encodeURIComponent(q) + '&limit=24&offset=0&sortBy=likes';
-    const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-    if (!res.ok) throw new Error('Search failed');
-    const data = await res.json();
-    renderResults(data, q);
-  } catch(e) {
-    // Fallback to Printables API
+    var url = 'https://api.thingiverse.com/search/' + encodeURIComponent(q)
+      + '?access_token=' + THINGIVERSE_TOKEN
+      + '&sort=' + currentSort
+      + '&per_page=12&page=1&type=things';
+    // Try direct fetch first (works if CORS is open)
+    var data, items;
     try {
-      const res2 = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.printables.com/graphql/'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: `{ prints(query:"${q}",limit:24,sort:LIKES_COUNT) { items { id name slug firstImage { filePath } category { name } user { publicUsername } printFilesSize summary } } }` })
-      });
-      const d2 = await res2.json();
-      renderPrintablesResults(d2, q);
-    } catch(e2) {
-      main.innerHTML = '<div class="error-msg">⚠️ Could not reach MakerWorld or Printables. Check your connection and try again.</div>';
+      var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + THINGIVERSE_TOKEN } });
+      if (res.ok) { data = await res.json(); }
+    } catch(e) {}
+    // Fallback to proxy
+    if (!data) {
+      var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      var res2 = await fetch(proxyUrl);
+      if (!res2.ok) throw new Error('API returned ' + res2.status);
+      data = await res2.json();
     }
+    items = Array.isArray(data) ? data : (data.hits || data.results || []);
+    if (!Array.isArray(items)) items = Object.values(items).filter(x => typeof x === 'object');
+    renderResults(items, q);
+  } catch(e) {
+    main.innerHTML = '<div class="state"><div style="font-size:2rem;">⚠️</div>'
+      + '<div style="color:var(--red);">Could not load results.</div>'
+      + '<div style="font-size:.74rem;">Make sure your Thingiverse token is set in the app.</div>'
+      + '<button class="sort-btn" onclick="doSearch()" style="margin-top:8px;">Try Again</button></div>';
   }
 }
 
-function renderResults(data, q) {
-  const main = document.getElementById('main');
-  const items = data?.hits || data?.data?.modelList?.hits || data?.items || [];
+function renderResults(items, q) {
+  var main = document.getElementById('main');
   if (!items.length) {
-    main.innerHTML = '<div class="empty">No results found for "' + h(q) + '". Try a different search!</div>';
+    main.innerHTML = '<div class="state"><div style="font-size:2rem;">🤷</div><div>No results for "' + h(q) + '"</div></div>';
     return;
   }
-  main.innerHTML = '<div class="section-title">Results for "' + h(q) + '" — ' + items.length + ' models</div><div class="grid" id="grid"></div>';
-  const grid = document.getElementById('grid');
-  items.forEach(item => {
-    const grams = item.filamentUsed || item.weight || item.filamentWeight || item.printFilesSize || null;
-    const price  = grams ? (grams * PRICE_PER_GRAM).toFixed(2) : null;
-    const img    = item.cover || item.thumbnail || item.firstImage?.filePath || null;
-    const name   = item.title || item.name || 'Untitled';
-    const creator= item.makerName || item.designerName || item.user?.publicUsername || 'Unknown';
-    const id     = item.id || item.objectId;
+  var sortBar = '<div class="sort-bar"><span class="sort-label">Sort:</span>'
+    + ['popular','relevant','newest'].map(function(s){
+        return '<button class="sort-btn' + (currentSort===s?' active':'') + '" onclick="currentSort=\'' + s + '\';doSearch();">' + s + '</button>';
+      }).join('') + '</div>';
 
-    const card = document.createElement('div');
+  main.innerHTML = sortBar + '<div class="grid" id="grid"></div>';
+  var grid = document.getElementById('grid');
+
+  items.forEach(function(item) {
+    var name    = item.name || 'Untitled';
+    var creator = item.creator?.name || item.user?.name || 'Unknown';
+    var img     = item.thumbnail || item.default_image?.url || item.preview_image || null;
+    var likes   = item.like_count || item.likes || 0;
+    var id      = item.id;
+    var url     = 'https://www.thingiverse.com/thing:' + id;
+
+    var card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = '<div class="card-img">'
-      + (img ? '<img src="' + h(img) + '" alt="" onerror="this.parentNode.textContent=\'🖨️\'">' : '🖨️')
-      + '</div><div class="card-body">'
-      + '<div class="card-name" title="' + h(name) + '">' + h(name) + '</div>'
+    card.innerHTML =
+      (img ? '<img class="card-img" src="' + h(img) + '" alt="" onerror="this.outerHTML=\'<div class=card-img-ph>🖨️</div>\'">'
+           : '<div class="card-img-ph">🖨️</div>')
+      + '<div class="card-body">'
+      + '<div class="card-name">' + h(name) + '</div>'
       + '<div class="card-creator">by ' + h(creator) + '</div>'
-      + '<div class="card-meta">'
-      + '<div><div class="card-price">' + (price ? '$' + price : 'Get quote') + '</div>'
-      + '<div class="card-grams">' + (grams ? grams + 'g filament' : 'Weight TBD') + '</div></div>'
-      + '<button class="card-add" onclick="event.stopPropagation();addToCart(' + JSON.stringify({id,name,creator,img,grams,price}) + ')">+ Cart</button>'
+      + '<div class="card-footer">'
+      + '<div class="card-likes">❤️ ' + likes + '</div>'
+      + '<button class="card-order" onclick="event.stopPropagation();">🛒 Order</button>'
       + '</div></div>';
-    card.onclick = () => showDetail({id,name,creator,img,grams,price,item});
+
+    card.querySelector('.card-order').onclick = function(e) {
+      e.stopPropagation();
+      showOrder({ name, creator, img, url, id });
+    };
+    card.onclick = function() { showOrder({ name, creator, img, url, id }); };
     grid.appendChild(card);
   });
 }
 
-function renderPrintablesResults(data, q) {
-  const items = data?.data?.prints?.items || [];
-  const mapped = items.map(i => ({
-    id: i.id, name: i.name, creator: i.user?.publicUsername,
-    img: i.firstImage?.filePath ? 'https://media.printables.com/' + i.firstImage.filePath : null,
-    grams: null, price: null
-  }));
-  renderResults({ hits: mapped }, q);
-}
-
-// ── MODEL DETAIL ──────────────────────
-function showDetail(model) {
-  const price = model.grams ? '$' + (model.grams * PRICE_PER_GRAM).toFixed(2) : 'Get quote';
-  modal('<div class="modal-title">' + h(model.name) + '</div>'
-    + '<div class="modal-sub">by ' + h(model.creator) + '</div>'
-    + (model.img ? '<img class="modal-img" src="' + h(model.img) + '" onerror="this.style.display=\'none\'">' : '')
-    + '<div class="modal-meta">'
-    + (model.grams ? '<div class="meta-item"><div class="meta-label">Filament</div><div class="meta-val">' + model.grams + 'g</div></div>' : '')
-    + '<div class="meta-item"><div class="meta-label">Price</div><div class="meta-val modal-price">' + price + '</div></div>'
-    + '</div>'
-    + '<div style="font-size:.68rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 11px;">⚠️ Please verify this model\'s license allows commercial printing before ordering.</div>'
-    + '<div class="modal-row">'
-    + '<button class="mbtn ghost" id="m-cancel">Close</button>'
-    + '<button class="mbtn" id="m-add">🛒 Add to Cart</button>'
-    + '</div>',
-    el => {
-      el.querySelector('#m-cancel').onclick = closeModal;
-      el.querySelector('#m-add').onclick = () => { addToCart(model); closeModal(); };
+// ── ORDER ─────────────────────────────
+function showOrder(model) {
+  modal('<div class="modal-title">🛒 Order This Print</div>'
+    +(model.img?'<img class="modal-img" src="'+h(model.img)+'" onerror="this.style.display=\'none\'">':'')
+    +'<div style="font-size:.76rem;font-weight:600;">'+h(model.name)+'</div>'
+    +'<div style="font-size:.68rem;color:var(--text3);">by '+h(model.creator)+'</div>'
+    +'<div style="font-size:.68rem;color:var(--accent);background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.18);border-radius:6px;padding:6px 10px;">🔗 '+h(model.url)+'</div>'
+    +'<div><div class="inp-label">Your Name *</div><input class="inp" id="o-name" placeholder="Your name"></div>'
+    +'<div><div class="inp-label">Email Address *</div><input class="inp" id="o-email" type="email" placeholder="your@email.com"></div>'
+    +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="o-phone" placeholder="+1 (555) 000-0000"></div>'
+    +'<div><div class="inp-label">Shipping Address *</div><textarea class="inp" id="o-addr" rows="2" placeholder="Street, City, State, ZIP"></textarea></div>'
+    +'<div><div class="inp-label">Color Preference</div><input class="inp" id="o-color" placeholder="e.g. Red, Blue, Black, Any…"></div>'
+    +'<div><div class="inp-label">Special Notes</div><textarea class="inp" id="o-notes" rows="2" placeholder="Quantity, size, anything else…"></textarea></div>'
+    +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 If no response within 48 hours of being contacted, your order will be automatically cancelled.</div>'
+    +'<div class="merr" id="o-err"></div>'
+    +'<div class="modal-row"><button class="mbtn ghost" id="o-cancel">Cancel</button><button class="mbtn" id="o-submit">📧 Place Order</button></div>',
+    function(el){
+      el.querySelector('#o-cancel').onclick = closeModal;
+      el.querySelector('#o-submit').onclick  = function(){ doOrder(model); };
     });
 }
 
-// ── CART ─────────────────────────────
-function addToCart(model) {
-  const existing = cart.find(i => i.id === model.id);
-  if (existing) { existing.qty++; }
-  else { cart.push({ ...model, qty: 1 }); }
-  saveCart(); renderCart(); toast('Added to cart!');
-}
-
-function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); }
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty = Math.max(1, item.qty + delta);
-  saveCart(); renderCart();
-}
-
-function saveCart() {
-  localStorage.setItem('d9prints_cart', JSON.stringify(cart));
-  const count = cart.reduce((a, i) => a + i.qty, 0);
-  const el = document.getElementById('cart-count');
-  if (el) el.textContent = count;
-}
-
-function renderCart() {
-  const el = document.getElementById('cart-items');
-  const total = cart.reduce((a, i) => a + (parseFloat(i.price || 0) * i.qty), 0);
-  const btn = document.getElementById('checkout-btn');
-  document.getElementById('cart-total').textContent = '$' + total.toFixed(2);
-  if (btn) btn.disabled = cart.length === 0;
-  if (!cart.length) { el.innerHTML = '<div class="cart-empty">Your cart is empty</div>'; return; }
-  el.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div class="ci-img">${item.img ? '<img src="' + h(item.img) + '" onerror="this.parentNode.textContent=\'🖨️\'">' : '🖨️'}</div>
-      <div class="ci-info">
-        <div class="ci-name">${h(item.name)}</div>
-        <div class="ci-price">${item.price ? '$' + (parseFloat(item.price) * item.qty).toFixed(2) : 'Quote needed'}</div>
-        <div class="ci-qty">
-          <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
-          <span style="font-size:.76rem;">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
-        </div>
-      </div>
-      <button class="ci-remove" onclick="removeFromCart('${item.id}')">✕</button>
-    </div>`).join('');
-}
-
-function toggleCart() {
-  cartOpen = !cartOpen;
-  document.getElementById('cart-panel').classList.toggle('open', cartOpen);
-}
-
-// ── CHECKOUT ─────────────────────────
-function showCheckout() {
-  const total = cart.reduce((a, i) => a + (parseFloat(i.price || 0) * i.qty), 0);
-  const itemsList = cart.map(i => `• ${i.name} x${i.qty} — ${i.price ? '$' + (parseFloat(i.price)*i.qty).toFixed(2) : 'Quote needed'}`).join('\n');
-  modal('<div class="modal-title">🛒 Checkout</div>'
-    + '<div class="modal-sub">Fill in your details. You\'ll be contacted to confirm your order before printing begins.</div>'
-    + '<div><div class="inp-label">Full Name *</div><input class="inp" id="co-name" placeholder="Your name"></div>'
-    + '<div><div class="inp-label">Email Address *</div><input class="inp" id="co-email" type="email" placeholder="your@email.com"></div>'
-    + '<div><div class="inp-label">Phone Number (optional)</div><input class="inp" id="co-phone" placeholder="+1 (555) 000-0000"></div>'
-    + '<div><div class="inp-label">Shipping Address *</div><textarea class="inp" id="co-addr" rows="2" placeholder="Street, City, State, ZIP"></textarea></div>'
-    + '<div><div class="inp-label">Special Notes</div><textarea class="inp" id="co-notes" rows="2" placeholder="Color preferences, special requests…"></textarea></div>'
-    + '<div style="background:var(--glass);border-radius:8px;padding:10px;font-size:.72rem;line-height:1.8;">'
-    + '<div style="font-weight:700;margin-bottom:4px;">Order Summary</div>'
-    + itemsList.split('\n').map(l => '<div>' + h(l) + '</div>').join('')
-    + '<div style="margin-top:6px;font-weight:700;color:var(--accent);">Total: $' + total.toFixed(2) + (cart.some(i=>!i.price) ? ' + quotes' : '') + '</div>'
-    + '</div>'
-    + '<div style="font-size:.68rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 11px;">📧 If no response is given within 48 hours of being contacted, your order will be automatically cancelled.</div>'
-    + '<div class="merr" id="co-err"></div>'
-    + '<div class="modal-row"><button class="mbtn ghost" id="co-cancel">Cancel</button><button class="mbtn green" id="co-submit">📧 Place Order</button></div>',
-    el => {
-      el.querySelector('#co-cancel').onclick = closeModal;
-      el.querySelector('#co-submit').onclick = doCheckout;
-    });
-}
-
-async function doCheckout() {
-  const name  = document.getElementById('co-name')?.value.trim();
-  const email = document.getElementById('co-email')?.value.trim();
-  const phone = document.getElementById('co-phone')?.value.trim();
-  const addr  = document.getElementById('co-addr')?.value.trim();
-  const notes = document.getElementById('co-notes')?.value.trim();
-  const err   = document.getElementById('co-err');
+async function doOrder(model) {
+  var name  = document.getElementById('o-name')?.value.trim();
+  var email = document.getElementById('o-email')?.value.trim();
+  var phone = document.getElementById('o-phone')?.value.trim();
+  var addr  = document.getElementById('o-addr')?.value.trim();
+  var color = document.getElementById('o-color')?.value.trim();
+  var notes = document.getElementById('o-notes')?.value.trim();
+  var err   = document.getElementById('o-err');
   err.classList.remove('show');
-  if (!name) { err.textContent='Enter your name.'; err.classList.add('show'); return; }
-  if (!email) { err.textContent='Enter your email.'; err.classList.add('show'); return; }
-  if (!addr) { err.textContent='Enter your shipping address.'; err.classList.add('show'); return; }
-
-  const total = cart.reduce((a, i) => a + (parseFloat(i.price || 0) * i.qty), 0);
-  const itemsList = cart.map(i => `${i.name} x${i.qty} — ${i.price ? '$'+(parseFloat(i.price)*i.qty).toFixed(2) : 'Quote needed'} (${i.grams||'?'}g)`).join('\n');
-
-  const btn = document.getElementById('co-submit');
-  btn.textContent = 'Sending…'; btn.disabled = true;
-
+  if (!name)  { err.textContent='Enter your name.';    err.classList.add('show'); return; }
+  if (!email) { err.textContent='Enter your email.';   err.classList.add('show'); return; }
+  if (!addr)  { err.textContent='Enter your address.'; err.classList.add('show'); return; }
+  var btn = document.getElementById('o-submit');
+  btn.textContent='Sending…'; btn.disabled=true;
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email:   'donutz.web.dev@gmail.com',
       from_name:  name,
       from_email: email,
-      phone:      phone || 'Not provided',
+      phone:      phone||'Not provided',
       address:    addr,
-      items:      itemsList,
-      total:      '$' + total.toFixed(2) + (cart.some(i=>!i.price) ? ' + quotes' : ''),
-      notes:      notes || 'None',
+      items:      model.name+'\nThingiverse: '+model.url,
+      total:      'Quote needed',
+      notes:      (color?'Color: '+color+'\n':'')+(notes||'None'),
       order_date: new Date().toLocaleString()
     });
-    cart = []; saveCart(); renderCart();
-    closeModal();
-    toast('✅ Order placed! Check your email for confirmation.');
+    closeModal(); toast('✅ Order placed! We\'ll contact you soon.');
   } catch(e) {
-    err.textContent = 'Failed to send: ' + e.text; err.classList.add('show');
-    btn.textContent = '📧 Place Order'; btn.disabled = false;
+    err.textContent='Send failed: '+(e.text||e.message||'error');
+    err.classList.add('show');
+    btn.textContent='📧 Place Order'; btn.disabled=false;
   }
 }
 
 // ── CUSTOM ORDER ──────────────────────
 function showCustomOrder() {
   modal('<div class="modal-title">✏️ Custom Print Request</div>'
-    + '<div class="modal-sub">Can\'t find what you\'re looking for? Describe what you want and we\'ll make it happen!</div>'
-    + '<div><div class="inp-label">Your Name *</div><input class="inp" id="cu-name" placeholder="Your name"></div>'
-    + '<div><div class="inp-label">Email Address *</div><input class="inp" id="cu-email" type="email" placeholder="your@email.com"></div>'
-    + '<div><div class="inp-label">Phone (optional)</div><input class="inp" id="cu-phone" placeholder="+1 (555) 000-0000"></div>'
-    + '<div><div class="inp-label">Describe your custom item *</div><textarea class="inp" id="cu-desc" rows="3" placeholder="Describe what you want printed. Include size, color, purpose, any reference images/links…"></textarea></div>'
-    + '<div><div class="inp-label">Reference Link (optional)</div><input class="inp" id="cu-link" placeholder="Link to a model, image, or inspiration"></div>'
-    + '<div><div class="inp-label">Special Notes</div><textarea class="inp" id="cu-notes" rows="2" placeholder="Any other details…"></textarea></div>'
-    + '<div style="font-size:.68rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 11px;">📧 We\'ll get back to you with a quote. If no response within 48 hours, the request is cancelled.</div>'
-    + '<div class="merr" id="cu-err"></div>'
-    + '<div class="modal-row"><button class="mbtn ghost" id="cu-cancel">Cancel</button><button class="mbtn orange" id="cu-submit">📧 Send Request</button></div>',
-    el => {
-      el.querySelector('#cu-cancel').onclick = closeModal;
-      el.querySelector('#cu-submit').onclick  = doCustomOrder;
+    +'<div class="modal-sub">Want something specific? Describe it and we\'ll make it happen!</div>'
+    +'<div><div class="inp-label">Your Name *</div><input class="inp" id="c-name" placeholder="Your name"></div>'
+    +'<div><div class="inp-label">Email Address *</div><input class="inp" id="c-email" type="email" placeholder="your@email.com"></div>'
+    +'<div><div class="inp-label">Phone (optional)</div><input class="inp" id="c-phone" placeholder="+1 (555) 000-0000"></div>'
+    +'<div><div class="inp-label">Describe your item *</div><textarea class="inp" id="c-desc" rows="3" placeholder="What do you want printed? Size, color, purpose, any links…"></textarea></div>'
+    +'<div><div class="inp-label">Special Notes</div><textarea class="inp" id="c-notes" rows="2" placeholder="Anything else…"></textarea></div>'
+    +'<div style="font-size:.67rem;color:var(--orange);background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.2);border-radius:7px;padding:8px 10px;">📧 We\'ll get back to you with a quote. No response in 48hrs = cancelled.</div>'
+    +'<div class="merr" id="c-err"></div>'
+    +'<div class="modal-row"><button class="mbtn ghost" id="c-cancel">Cancel</button><button class="mbtn orange" id="c-submit">📧 Send Request</button></div>',
+    function(el){
+      el.querySelector('#c-cancel').onclick = closeModal;
+      el.querySelector('#c-submit').onclick  = doCustom;
     });
 }
 
-async function doCustomOrder() {
-  const name  = document.getElementById('cu-name')?.value.trim();
-  const email = document.getElementById('cu-email')?.value.trim();
-  const phone = document.getElementById('cu-phone')?.value.trim();
-  const desc  = document.getElementById('cu-desc')?.value.trim();
-  const link  = document.getElementById('cu-link')?.value.trim();
-  const notes = document.getElementById('cu-notes')?.value.trim();
-  const err   = document.getElementById('cu-err');
+async function doCustom() {
+  var name  = document.getElementById('c-name')?.value.trim();
+  var email = document.getElementById('c-email')?.value.trim();
+  var phone = document.getElementById('c-phone')?.value.trim();
+  var desc  = document.getElementById('c-desc')?.value.trim();
+  var notes = document.getElementById('c-notes')?.value.trim();
+  var err   = document.getElementById('c-err');
   err.classList.remove('show');
-  if (!name)  { err.textContent='Enter your name.';        err.classList.add('show'); return; }
-  if (!email) { err.textContent='Enter your email.';       err.classList.add('show'); return; }
-  if (!desc)  { err.textContent='Describe your item.';     err.classList.add('show'); return; }
-
-  const btn = document.getElementById('cu-submit');
-  btn.textContent='Sending…'; btn.disabled=true;
-
+  if (!name)  { err.textContent='Enter your name.';    err.classList.add('show'); return; }
+  if (!email) { err.textContent='Enter your email.';   err.classList.add('show'); return; }
+  if (!desc)  { err.textContent='Describe your item.'; err.classList.add('show'); return; }
+  var btn=document.getElementById('c-submit'); btn.textContent='Sending…'; btn.disabled=true;
   try {
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
       to_email:   'donutz.web.dev@gmail.com',
-      from_name:  name,
-      from_email: email,
-      phone:      phone || 'Not provided',
+      from_name:  name, from_email: email,
+      phone:      phone||'Not provided',
       address:    'N/A — Custom Request',
-      items:      'CUSTOM REQUEST:\n' + desc + (link ? '\nReference: ' + link : ''),
+      items:      'CUSTOM: '+desc,
       total:      'Quote needed',
-      notes:      notes || 'None',
+      notes:      notes||'None',
       order_date: new Date().toLocaleString()
     });
-    closeModal();
-    toast('✅ Custom request sent! We\'ll get back to you with a quote.');
+    closeModal(); toast('✅ Request sent! We\'ll quote you soon.');
   } catch(e) {
-    err.textContent='Failed to send: '+e.text; err.classList.add('show');
+    err.textContent='Send failed: '+(e.text||e.message||'error');
+    err.classList.add('show');
     btn.textContent='📧 Send Request'; btn.disabled=false;
   }
 }
 
-// ── MODAL UTILS ───────────────────────
-function modal(html, wire) {
+function modal(html,wire){
   closeModal();
-  const bg = document.createElement('div'); bg.className='modal-bg'; bg.id='modal-bg';
-  const m  = document.createElement('div'); m.className='modal'; m.innerHTML=html;
-  bg.appendChild(m); document.body.appendChild(bg);
-  bg.onclick = e => { if(e.target===bg) closeModal(); };
-  if (wire) wire(m);
+  var bg=document.createElement('div');bg.className='modal-bg';bg.id='modal-bg';
+  var m=document.createElement('div');m.className='modal';m.innerHTML=html;
+  bg.appendChild(m);document.body.appendChild(bg);
+  bg.onclick=function(e){if(e.target===bg)closeModal();};
+  if(wire)wire(m);
 }
-function closeModal() { document.getElementById('modal-bg')?.remove(); }
-
+function closeModal(){document.getElementById('modal-bg')?.remove();}
+function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var toastT;
-function toast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3000);
-}
-function h(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// Init
-saveCart(); renderCart();
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},3500);}
 </script>
 </body>
 </html>
