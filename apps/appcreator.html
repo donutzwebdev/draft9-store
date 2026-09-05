@@ -606,29 +606,39 @@ function doSubmit() {
 
   var html = appMode==='block' ? blocksToHTML() : document.getElementById('code-editor').value;
 
-  // Try Firebase if available (inside Draft 9)
-  if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+  // Submit to Cloudflare Worker which pushes to GitHub
+  if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
+    // Also save to Firebase for admin review
     firebase.firestore().collection('app_submissions').add({
-      name:name,icon:icon,desc:desc,creator:creator,
-      type:'html',code:html,status:'pending',
-      submittedAt:firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function(){
-      closeModal(); showToast('✅ Submitted! A Draft 9 admin will review your app.');
+      name, icon, desc, creator, type:'html', code:html, status:'pending',
+      submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
+  }
+  // Push directly to GitHub via Cloudflare Worker
+  fetch('https://draft9-store.donutz-web-dev.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name, icon: icon||'📦', description: desc,
+      category: 'Community', version: '1.0',
+      id: name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+      code: html
+    })
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.success) {
+        closeModal();
+        showToast('✅ App published to the store! It may take 60 seconds to appear.');
+      } else {
+        document.getElementById('sub-err').textContent = d.error || 'Unknown error';
+        document.getElementById('sub-err').classList.add('show');
+        document.getElementById('co-submit').textContent='Submit'; 
+        document.getElementById('co-submit').disabled=false;
+      }
     }).catch(function(e){
-      document.getElementById('sub-err').textContent=e.message;
+      document.getElementById('sub-err').textContent = 'Failed: ' + e.message;
       document.getElementById('sub-err').classList.add('show');
     });
-  } else {
-    // Fallback: download JSON
-    var sub=JSON.stringify({name,icon,desc,creator,code:html},null,2);
-    var blob=new Blob([sub],{type:'application/json'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;a.download=name.replace(/\s+/g,'-').toLowerCase()+'-submission.json';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    closeModal(); showToast('Downloaded! Send the JSON file to the Draft 9 admin.');
-  }
 }
 
 // ── SAVE / LOAD ──────────────────────
