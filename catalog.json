@@ -2,7 +2,7 @@
   {
     "id": "calculator",
     "name": "Calculator",
-    "icon": "🧮",
+    "icon": "ð§®",
     "description": "A simple calculator with keyboard support.",
     "version": "1.0",
     "type": "html",
@@ -12,7 +12,7 @@
   {
     "id": "messages",
     "name": "Messages",
-    "icon": "💬",
+    "icon": "ð¬",
     "description": "Real-time servers and DMs. Create a server, share the code, chat instantly.",
     "version": "2.0",
     "type": "html",
@@ -22,7 +22,7 @@
   {
     "id": "notes",
     "name": "Notes",
-    "icon": "📝",
+    "icon": "ð",
     "description": "Write and save notes that persist between sessions.",
     "version": "1.0",
     "type": "html",
@@ -32,7 +32,7 @@
   {
     "id": "clock",
     "name": "Clock",
-    "icon": "🕐",
+    "icon": "ð",
     "description": "World clock, stopwatch, and countdown timer all in one.",
     "version": "1.0",
     "type": "html",
@@ -42,7 +42,7 @@
   {
     "id": "weather",
     "name": "Weather",
-    "icon": "🌤",
+    "icon": "ð¤",
     "description": "Live weather by city or your current location. 7-day forecast included.",
     "version": "1.0",
     "type": "html",
@@ -52,7 +52,7 @@
   {
     "id": "music",
     "name": "Music Player",
-    "icon": "🎵",
+    "icon": "ðµ",
     "description": "Play music from URLs or local files. Queue, skip, seek, and volume control.",
     "version": "1.0",
     "type": "html",
@@ -62,7 +62,7 @@
   {
     "id": "paint",
     "name": "Paint",
-    "icon": "🎨",
+    "icon": "ð¨",
     "description": "Drawing canvas with pen, brush, eraser, shapes, fill, and undo support.",
     "version": "1.0",
     "type": "html",
@@ -72,7 +72,7 @@
   {
     "id": "games",
     "name": "Games",
-    "icon": "🎮",
+    "icon": "ð®",
     "description": "20+ browser games across Arcade, Puzzle, Strategy, Cards and more.",
     "version": "1.0",
     "type": "html",
@@ -82,7 +82,7 @@
   {
     "id": "appcreator",
     "name": "App Creator",
-    "icon": "🛠",
+    "icon": "ð ",
     "description": "Build your own Draft 9 apps with a live HTML/JS editor and submit them to the store.",
     "version": "1.0",
     "type": "html",
@@ -92,11 +92,21 @@
   {
     "id": "products",
     "name": "Products",
-    "icon": "🖨️",
+    "icon": "ð¨ï¸",
     "description": "Order custom 3D printed items. Search MakerWorld models or request something custom.",
     "version": "1.0",
     "type": "html",
     "category": "Utilities",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/products.html"
+  },
+  {
+    "id": "test-1",
+    "name": "test 1",
+    "icon": "fff",
+    "description": "fff",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/test-1.html"
   }
 ]
