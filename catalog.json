@@ -98,5 +98,15 @@
     "type": "html",
     "category": "Utilities",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/products.html"
+  },
+  {
+    "id": "test-app",
+    "name": "Test App",
+    "icon": "idk",
+    "description": "A test app for testing the app creator",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/test-app.html"
   }
 ]
