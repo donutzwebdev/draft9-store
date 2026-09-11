@@ -118,5 +118,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/virtualbox.html"
+  },
+  {
+    "id": "resident-evil",
+    "name": "resident evil",
+    "icon": "☣︎",
+    "description": "Set in July 1998 near the fictional Midwestern town of Raccoon City.Bizarre cannibalistic murders ha",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/resident-evil.html"
   }
 ]
