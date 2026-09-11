@@ -128,5 +128,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/resident-evil.html"
+  },
+  {
+    "id": "emulatorjs",
+    "name": "EmulatorJS",
+    "icon": "🕹️",
+    "description": "play roms and stuff you feel me",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/emulatorjs.html"
   }
 ]
