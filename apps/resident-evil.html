@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nightfall Manor — Survival Horror</title>
+<style>
+  :root{
+    --red:#9d1d22;
+    --dark:#070808;
+    --panel:rgba(7,9,9,.92);
+    --line:#514b43;
+    --paper:#c9c0ad;
+    --muted:#8e8a80;
+    --green:#78976b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020303;color:#ddd;font-family:Georgia,"Times New Roman",serif}
+  body{display:grid;place-items:center}
+  #game{
+    position:relative;
+    width:min(1100px,100vw);
+    height:min(720px,100vh);
+    aspect-ratio:1100/720;
+    background:#000;
+    box-shadow:0 0 45px #000;
+    overflow:hidden;
+    border:1px solid #171717;
+  }
+  canvas{width:100%;height:100%;display:block;background:#080909;image-rendering:auto}
+  #noise{
+    position:absolute;inset:0;pointer-events:none;opacity:.11;mix-blend-mode:screen;
+    background-image:
+      radial-gradient(circle at 20% 20%, #fff 0 1px, transparent 1px),
+      radial-gradient(circle at 70% 40%, #fff 0 1px, transparent 1px),
+      radial-gradient(circle at 35% 85%, #fff 0 1px, transparent 1px);
+    background-size:7px 7px,11px 11px,17px 17px;
+  }
+  #vignette{
+    position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.32) 68%, rgba(0,0,0,.82) 100%);
+  }
+  #hud{position:absolute;inset:0;pointer-events:none}
+  .topbar{
+    position:absolute;left:18px;right:18px;top:16px;display:flex;justify-content:space-between;
+    font-size:14px;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 2px 3px #000;
+  }
+  .badge{
+    padding:7px 11px;border:1px solid rgba(180,165,140,.35);
+    background:rgba(0,0,0,.48);backdrop-filter:blur(2px)
+  }
+  #status{
+    position:absolute;left:18px;bottom:16px;width:245px;padding:12px;
+    border:1px solid rgba(180,165,140,.35);background:rgba(0,0,0,.57)
+  }
+  .label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#a7a299}
+  .bar{height:9px;background:#1c1d1c;border:1px solid #464646;margin-top:6px}
+  .fill{height:100%;width:100%;background:var(--green);transition:width .15s}
+  #ammo{
+    position:absolute;right:18px;bottom:16px;padding:12px 16px;border:1px solid rgba(180,165,140,.35);
+    background:rgba(0,0,0,.57);text-align:right;min-width:150px
+  }
+  #message{
+    position:absolute;left:50%;bottom:118px;transform:translateX(-50%);
+    min-width:360px;max-width:80%;text-align:center;padding:11px 16px;
+    background:rgba(5,6,6,.8);border:1px solid rgba(180,165,140,.28);
+    opacity:0;transition:opacity .2s;font-size:16px;letter-spacing:.03em
+  }
+  #message.show{opacity:1}
+  #interact{
+    position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);
+    padding:9px 14px;border:1px solid rgba(214,200,177,.3);background:rgba(0,0,0,.72);
+    color:#d7d0c2;opacity:0;transition:opacity .2s
+  }
+  #crosshair{
+    position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);opacity:.55
+  }
+  #crosshair:before,#crosshair:after{content:"";position:absolute;background:#ddd;box-shadow:0 0 4px #000}
+  #crosshair:before{left:11px;top:0;width:2px;height:24px}
+  #crosshair:after{left:0;top:11px;width:24px;height:2px}
+  #inventory{
+    position:absolute;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:10
+  }
+  #inventory.open{display:grid}
+  .inv-panel{
+    width:min(760px,88vw);background:#0b0d0d;border:1px solid #5a544a;
+    box-shadow:0 25px 60px #000;padding:28px
+  }
+  .inv-title{font-size:28px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+  .inv-sub{color:#8f8a81;font-size:13px;margin-bottom:20px}
+  .slots{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+  .slot{
+    aspect-ratio:1;border:1px solid #48433c;background:#111514;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:6px;color:#ccc
+  }
+  .slot.selected{border-color:#b89c75;box-shadow:inset 0 0 0 1px #b89c75}
+  .slot .icon{font-size:26px;filter:grayscale(.3);margin-bottom:5px}
+  .slot .name{font-size:10px;letter-spacing:.06em}
+  .slot .count{font-size:11px;color:#969086;margin-top:4px}
+  #startScreen,#gameOver,#winScreen{
+    position:absolute;inset:0;display:grid;place-items:center;background:
+    radial-gradient(circle at center, rgba(35,28,23,.22), rgba(0,0,0,.96) 72%);
+    z-index:20
+  }
+  .title-card{width:min(680px,90vw);text-align:center;padding:50px 35px}
+  .kicker{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:#9c9385}
+  h1{font-size:clamp(42px,7vw,84px);line-height:.93;margin:14px 0;color:#d4cec1;letter-spacing:.07em;text-shadow:0 5px 20px #000}
+  .subtitle{max-width:590px;margin:0 auto 25px;color:#9a958b;line-height:1.6}
+  button{
+    appearance:none;border:1px solid #7f6b50;background:#141311;color:#d8d0c1;
+    padding:12px 20px;cursor:pointer;font-family:inherit;font-size:15px;letter-spacing:.08em;text-transform:uppercase;
+  }
+  button:hover{background:#241d17;border-color:#ab8e69}
+  .controls{
+    margin-top:18px;color:#77736b;font-size:12px;line-height:1.6
+  }
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30}
+  #redFlash{position:absolute;inset:0;background:rgba(140,0,0,.23);opacity:0;pointer-events:none;z-index:29}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="game">
+  <canvas id="canvas" width="1100" height="720"></canvas>
+  <div id="noise"></div><div id="vignette"></div>
+  <div id="hud">
+    <div class="topbar">
+      <div class="badge">NIGHTFALL MANOR</div>
+      <div class="badge" id="roomName">WEST HALL</div>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="interact">[E] Examine</div>
+    <div id="message"></div>
+
+    <div id="status">
+      <div class="label">Condition</div>
+      <div class="bar"><div id="healthFill" class="fill"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px">
+        <span id="healthText">Fine</span><span>9mm Handgun</span>
+      </div>
+    </div>
+
+    <div id="ammo">
+      <div class="label">Ammunition</div>
+      <div style="font-size:28px;margin-top:2px"><span id="ammoText">8</span> <span style="font-size:13px;color:#888">/ <span id="reserveText">24</span></span></div>
+    </div>
+  </div>
+
+  <div id="inventory">
+    <div class="inv-panel">
+      <div class="inv-title">Inventory</div>
+      <div class="inv-sub">Press I or Esc to close. Press 1–6 to inspect slots.</div>
+      <div id="slots" class="slots"></div>
+    </div>
+  </div>
+
+  <div id="flash"></div>
+  <div id="redFlash"></div>
+
+  <div id="startScreen">
+    <div class="title-card">
+      <div class="kicker">A survival horror prototype</div>
+      <h1>NIGHTFALL<br>MANOR</h1>
+      <div class="subtitle">The rain stopped an hour ago. The house did not. Explore the abandoned manor, find the brass key, and make it to the locked study before whatever is upstairs finds you.</div>
+      <button id="startBtn">Enter the Manor</button>
+      <div class="controls">WASD / Arrow Keys — move &nbsp;•&nbsp; Mouse / Space — aim &nbsp;•&nbsp; Click / F — fire<br>E — interact &nbsp;•&nbsp; I — inventory &nbsp;•&nbsp; R — reload</div>
+    </div>
+  </div>
+
+  <div id="gameOver" class="hidden">
+    <div class="title-card">
+      <div class="kicker">The house keeps its secrets</div>
+      <h1>YOU DIED</h1>
+      <div class="subtitle">Your flashlight disappears into the dark.</div>
+      <button onclick="location.reload()">Try Again</button>
+    </div>
+  </div>
+
+  <div id="winScreen" class="hidden">
+    <div class="title-card">
+      <div class="kicker">Case file closed</div>
+      <h1>ESCAPED</h1>
+      <div class="subtitle">You found the study and discovered the source of the noises below the manor.</div>
+      <button onclick="location.reload()">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  const ui = {
+    start: document.getElementById("startScreen"),
+    over: document.getElementById("gameOver"),
+    win: document.getElementById("winScreen"),
+    inventory: document.getElementById("inventory"),
+    slots: document.getElementById("slots"),
+    room: document.getElementById("roomName"),
+    healthFill: document.getElementById("healthFill"),
+    healthText: document.getElementById("healthText"),
+    ammo: document.getElementById("ammoText"),
+    reserve: document.getElementById("reserveText"),
+    msg: document.getElementById("message"),
+    interact: document.getElementById("interact"),
+    flash: document.getElementById("flash"),
+    redFlash: document.getElementById("redFlash")
+  };
+
+  const keys = new Set();
+  let mouseX = W/2, mouseY = H/2, firing = false;
+  let paused = true;
+  let last = performance.now(), t = 0;
+  let shake = 0, flash = 0, redFlash = 0;
+
+  const state = {
+    room: "hall",
+    health: 100,
+    ammo: 8,
+    reserve: 24,
+    shells: 0,
+    medkits: 1,
+    key: false,
+    fuse: false,
+    noteRead: false,
+    doorOpen: false,
+    selected: 0,
+    score: 0
+  };
+
+  const rooms = {
+    hall: {
+      name:"West Hall",
+      bg:["#181917","#2b2720"],
+      walls:{x:75,y:105,w:950,h:530},
+      exits:{
+        top:{x:455,y:105,w:190,h:22,to:"upper"},
+        right:{x:1004,y:320,w:22,h:120,to:"foyer"},
+        bottom:{x:455,y:613,w:190,h:22,to:"cellar"}
+      }
+    },
+    foyer: {
+      name:"Grand Foyer",
+      bg:["#151615","#2b2924"],
+      walls:{x:55,y:95,w:990,h:550},
+      exits:{
+        left:{x:55,y:320,w:22,h:120,to:"hall"},
+        right:{x:1023,y:280,w:22,h:160,to:"study"}
+      }
+    },
+    upper: {
+      name:"Upper Landing",
+      bg:["#171716","#29261f"],
+      walls:{x:75,y:105,w:950,h:530},
+      exits:{
+        bottom:{x:455,y:613,w:190,h:22,to:"hall"}
+      }
+    },
+    cellar: {
+      name:"Cellar",
+      bg:["#101110","#21201c"],
+      walls:{x:60,y:85,w:980,h:565},
+      exits:{
+        top:{x:455,y:85,w:190,h:22,to:"hall"}
+      }
+    },
+    study: {
+      name:"Locked Study",
+      bg:["#191817","#2c261f"],
+      walls:{x:75,y:105,w:950,h:530},
+      exits:{
+        left:{x:75,y:280,w:22,h:160,to:"foyer"}
+      }
+    }
+  };
+
+  const player = {x:550,y:365,r:15,speed:175,angle:0,invuln:0};
+
+  const enemies = {
+    hall:[
+      {x:780,y:250,hp:3,max:3,speed:48,hit:0,dead:false},
+      {x:350,y:500,hp:3,max:3,speed:42,hit:0,dead:false}
+    ],
+    foyer:[
+      {x:765,y:420,hp:4,max:4,speed:52,hit:0,dead:false}
+    ],
+    upper:[
+      {x:340,y:280,hp:5,max:5,speed:57,hit:0,dead:false},
+      {x:760,y:250,hp:3,max:3,speed:62,hit:0,dead:false}
+    ],
+    cellar:[
+      {x:270,y:330,hp:4,max:4,speed:44,hit:0,dead:false},
+      {x:800,y:490,hp:4,max:4,speed:49,hit:0,dead:false},
+      {x:525,y:250,hp:5,max:5,speed:55,hit:0,dead:false}
+    ],
+    study:[]
+  };
+
+  const items = {
+    hall:[
+      {x:210,y:200,type:"note",used:false},
+      {x:860,y:540,type:"ammo",used:false},
+    ],
+    foyer:[
+      {x:550,y:420,type:"key",used:false}
+    ],
+    upper:[
+      {x:820,y:180,type:"medkit",used:false},
+      {x:270,y:500,type:"ammo",used:false}
+    ],
+    cellar:[
+      {x:530,y:420,type:"fuse",used:false},
+      {x:820,y:260,type:"ammo",used:false},
+    ],
+    study:[]
+  };
+
+  function resetEnemies(){
+    Object.values(enemies).forEach(list => list.forEach(e => {
+      e.dead = false;
+      e.hit = 0;
+    }));
+  }
+
+  function resetItems(){
+    Object.values(items).forEach(list => list.forEach(i => i.used = false));
+  }
+
+  function resizeCanvas(){
+    const r = canvas.getBoundingClientRect();
+    // Drawing remains at fixed internal resolution for consistent gameplay.
+  }
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+  function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+  function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+
+  function showMessage(text, ms=1800){
+    ui.msg.textContent = text;
+    ui.msg.classList.add("show");
+    clearTimeout(showMessage.timer);
+    showMessage.timer = setTimeout(()=>ui.msg.classList.remove("show"),ms);
+  }
+
+  function setRoom(name){
+    state.room = name;
+    const r = rooms[name];
+    ui.room.textContent = r.name.toUpperCase();
+    player.x = name==="hall" ? 905 : name==="foyer" ? 90 : name==="upper" ? 550 : name==="cellar" ? 550 : 970;
+    player.y = name==="hall" ? 375 : name==="foyer" ? 375 : name==="upper" ? 580 : name==="cellar" ? 110 : 375;
+    player.invuln = .6;
+    showMessage(r.name,900);
+  }
+
+  function rectContainsCircle(rect,x,y,r){
+    return x+r>rect.x && x-r<rect.x+rect.w && y+r>rect.y && y-r<rect.y+rect.h;
+  }
+
+  function collideWalls(nx,ny){
+    const r = rooms[state.room];
+    const w = r.walls;
+    const pad=8;
+    const minX=w.x+pad,maxX=w.x+w.w-pad,minY=w.y+pad,maxY=w.y+w.h-pad;
+    if(nx-player.r<minX || nx+player.r>maxX || ny-player.r<minY || ny+player.r>maxY) return true;
+
+    // decorative furniture collision
+    const furniture = getFurniture(state.room);
+    for(const f of furniture){
+      if(f.solid && rectContainsCircle({x:f.x,y:f.y,w:f.w,h:f.h},nx,ny,player.r)) return true;
+    }
+
+    return false;
+  }
+
+  function getFurniture(room){
+    const common = [
+      {x:150,y:145,w:185,h:34,solid:true,type:"table"},
+      {x:750,y:145,w:210,h:34,solid:true,type:"table"},
+      {x:145,y:545,w:220,h:32,solid:true,type:"bench"},
+      {x:730,y:530,w:215,h:32,solid:true,type:"bench"}
+    ];
+    const unique = {
+      hall:[
+        {x:435,y:240,w:220,h:38,solid:true,type:"rug"},
+        {x:488,y:222,w:125,h:28,solid:true,type:"cabinet"}
+      ],
+      foyer:[
+        {x:450,y:205,w:200,h:38,solid:true,type:"rug"},
+        {x:500,y:260,w:100,h:180,solid:true,type:"stairs"}
+      ],
+      upper:[
+        {x:420,y:270,w:260,h:36,solid:true,type:"rug"},
+        {x:185,y:360,w:160,h:30,solid:true,type:"cabinet"},
+        {x:755,y:370,w:160,h:30,solid:true,type:"cabinet"}
+      ],
+      cellar:[
+        {x:160,y:235,w:170,h:34,solid:true,type:"crate"},
+        {x:735,y:360,w:170,h:34,solid:true,type:"crate"},
+        {x:445,y:520,w:220,h:30,solid:true,type:"workbench"}
+      ],
+      study:[
+        {x:380,y:175,w:340,h:34,solid:true,type:"desk"},
+        {x:410,y:510,w:260,h:28,solid:true,type:"bookshelf"}
+      ]
+    };
+    return [...common,...(unique[room]||[])];
+  }
+
+  function tryRoomTransition(){
+    const r = rooms[state.room];
+    for(const [side,e] of Object.entries(r.exits)){
+      if(rectContainsCircle(e,player.x,player.y,player.r+2)){
+        if(state.room==="foyer" && side==="right"){
+          if(state.fuse){
+            setRoom("study");
+          }else{
+            showMessage("The study door is locked. Something mechanical is missing.",2200);
+          }
+          return;
+        }
+        setRoom(e.to);
+        return;
+      }
+    }
+  }
+
+  function getNearestItem(){
+    let nearest=null, best=48;
+    for(const it of items[state.room]){
+      if(it.used) continue;
+      const d=Math.hypot(it.x-player.x,it.y-player.y);
+      if(d<best){best=d;nearest=it;}
+    }
+    return nearest;
+  }
+
+  function getNearbyEnemy(){
+    let nearest=null,best=58;
+    for(const e of enemies[state.room]){
+      if(e.dead) continue;
+      const d=Math.hypot(e.x-player.x,e.y-player.y);
+      if(d<best){best=d;nearest=e;}
+    }
+    return nearest;
+  }
+
+  function interact(){
+    const it=getNearestItem();
+    if(it){
+      it.used=true;
+      if(it.type==="note"){
+        state.noteRead=true;
+        showMessage("A torn note: “The power room is below the wine cellar. Do not go alone.”",4000);
+      } else if(it.type==="ammo"){
+        state.reserve += 10;
+        showMessage("You found handgun ammunition. +10 rounds");
+      } else if(it.type==="medkit"){
+        state.medkits++;
+        showMessage("You found a first aid spray.");
+      } else if(it.type==="key"){
+        state.key=true;
+        showMessage("Brass Study Key acquired.");
+      } else if(it.type==="fuse"){
+        state.fuse=true;
+        showMessage("Backup fuse acquired. The study lock can be powered.");
+      }
+      updateInventory();
+      return;
+    }
+    if(state.room==="study" && !state.doorOpen){
+      state.doorOpen=true;
+      showMessage("A file on the desk is stamped: PROJECT NIGHTFALL.",2800);
+      setTimeout(()=>ui.win.classList.remove("hidden"),1200);
+      return;
+    }
+    if(getNearbyEnemy()){
+      showMessage("It is too close to search!");
+    } else {
+      showMessage("Nothing useful here.");
+    }
+  }
+
+  function fire(){
+    if(paused || ui.inventory.classList.contains("open") || state.health<=0) return;
+    if(state.ammo<=0){
+      showMessage("Click. Empty magazine.");
+      shake=2;
+      return;
+    }
+    state.ammo--;
+    flash=0.28; shake=5;
+    // Ray-like hit using aim angle.
+    const dir={x:Math.cos(player.angle), y:Math.sin(player.angle)};
+    let target=null, best=900;
+    for(const e of enemies[state.room]){
+      if(e.dead) continue;
+      const vx=e.x-player.x,vy=e.y-player.y;
+      const d=Math.hypot(vx,vy);
+      if(d>best) continue;
+      const dot=(vx*dir.x+vy*dir.y)/Math.max(d,1);
+      if(dot<0.975) continue;
+      // perpendicular distance
+      const cross=Math.abs(vx*dir.y-vy*dir.x);
+      if(cross < 27 + d*0.025){
+        target=e; best=d;
+      }
+    }
+    if(target){
+      target.hp--;
+      target.hit=.18;
+      showMessage(target.hp>0 ? "Hit." : "Target down.",500);
+      if(target.hp<=0){
+        target.dead=true;
+        state.score+=100;
+      }
+    } else {
+      showMessage("The shot echoes through the manor.",450);
+    }
+    updateHUD();
+  }
+
+  function reload(){
+    if(paused || state.ammo>=8 || state.reserve<=0) return;
+    const need=8-state.ammo;
+    const take=Math.min(need,state.reserve);
+    state.ammo += take;
+    state.reserve -= take;
+    showMessage("Reloaded.",600);
+    updateHUD();
+  }
+
+  function useMedkit(){
+    if(state.medkits<=0 || state.health>=100) return;
+    state.medkits--;
+    state.health=100;
+    showMessage("First aid spray used.");
+    updateHUD(); updateInventory();
+  }
+
+  function updatePlayer(dt){
+    let dx=0,dy=0;
+    if(keys.has("w")||keys.has("arrowup"))dy--;
+    if(keys.has("s")||keys.has("arrowdown"))dy++;
+    if(keys.has("a")||keys.has("arrowleft"))dx--;
+    if(keys.has("d")||keys.has("arrowright"))dx++;
+    if(dx||dy){
+      const len=Math.hypot(dx,dy); dx/=len; dy/=len;
+      const speed=player.speed*(keys.has("shift")?1.18:1);
+      let nx=player.x+dx*speed*dt, ny=player.y+dy*speed*dt;
+      if(!collideWalls(nx,player.y)) player.x=nx;
+      if(!collideWalls(player.x,ny)) player.y=ny;
+    }
+    if(player.invuln>0)player.invuln-=dt;
+    tryRoomTransition();
+
+    // mouse direction relative to player
+    player.angle=Math.atan2(mouseY-player.y, mouseX-player.x);
+  }
+
+  function updateEnemies(dt){
+    for(const e of enemies[state.room]){
+      if(e.dead) continue;
+      e.hit=Math.max(0,e.hit-dt);
+      const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy)||1;
+      if(d<330){
+        let nx=e.x+(dx/d)*e.speed*dt;
+        let ny=e.y+(dy/d)*e.speed*dt;
+        // avoid pushing through furniture
+        const furniture=getFurniture(state.room);
+        let blocked=false;
+        for(const f of furniture){
+          if(rectContainsCircle({x:f.x,y:f.y,w:f.w,h:f.h},nx,ny,12)){blocked=true;break;}
+        }
+        if(!blocked){e.x=nx;e.y=ny;}
+      }
+      if(d<34 && player.invuln<=0){
+        player.health-=18;
+        player.invuln=.8;
+        redFlash=.45; shake=8;
+        showMessage("The creature claws at you.",500);
+        updateHUD();
+        if(player.health<=0){ player.health=0; paused=true; ui.over.classList.remove("hidden");}
+      }
+    }
+  }
+
+  function updateHUD(){
+    ui.healthFill.style.width=clamp(state.health,0,100)+"%";
+    const status = state.health>75 ? "Fine" : state.health>45 ? "Wounded" : state.health>20 ? "Critical" : "Dying";
+    ui.healthText.textContent=status;
+    ui.ammo.textContent=state.ammo;
+    ui.reserve.textContent=state.reserve;
+  }
+
+  function updateInventory(){
+    const data=[
+      {name:"Handgun",icon:"🔫",count:"Equipped"},
+      {name:"Ammo",icon:"▣",count:state.reserve+" rounds"},
+      {name:"First Aid",icon:"✚",count:state.medkits},
+      {name:"Brass Key",icon:"🗝",count:state.key?"Found":"—"},
+      {name:"Fuse",icon:"⚡",count:state.fuse?"Found":"—"},
+      {name:"Note",icon:"▤",count:state.noteRead?"Read":"Unread"}
+    ];
+    ui.slots.innerHTML="";
+    data.forEach((d,i)=>{
+      const s=document.createElement("div");s.className="slot"+(i===state.selected?" selected":"");
+      s.innerHTML=`<div class="icon">${d.icon}</div><div class="name">${d.name}</div><div class="count">${d.count}</div>`;
+      s.onclick=()=>{state.selected=i;updateInventory();};
+      ui.slots.appendChild(s);
+    });
+  }
+
+  function drawBackground(){
+    const r=rooms[state.room];
+    const grd=ctx.createLinearGradient(0,0,W,H);
+    grd.addColorStop(0,r.bg[0]);grd.addColorStop(1,r.bg[1]);
+    ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+
+    const w=r.walls;
+    ctx.fillStyle="#0b0d0d";ctx.fillRect(w.x-16,w.y-16,w.w+32,w.h+32);
+    // wall panels
+    ctx.fillStyle="#262822";ctx.fillRect(w.x,w.y,w.w,w.h);
+    ctx.strokeStyle="#5c564a";ctx.lineWidth=3;ctx.strokeRect(w.x,w.y,w.w,w.h);
+    ctx.strokeStyle="rgba(145,131,108,.16)";ctx.lineWidth=1;
+    for(let x=w.x+45;x<w.x+w.w;x+=70){ctx.beginPath();ctx.moveTo(x,w.y);ctx.lineTo(x,w.y+w.h);ctx.stroke();}
+    for(let y=w.y+45;y<w.y+w.h;y+=56){ctx.beginPath();ctx.moveTo(w.x,y);ctx.lineTo(w.x+w.w,y);ctx.stroke();}
+    // floor
+    ctx.fillStyle="#111413";ctx.fillRect(w.x+7,w.y+7,w.w-14,w.h-14);
+    ctx.strokeStyle="rgba(170,150,120,.12)";
+    for(let y=w.y+28;y<w.y+w.h-20;y+=42){ctx.beginPath();ctx.moveTo(w.x+10,y);ctx.lineTo(w.x+w.w-10,y);ctx.stroke();}
+    // exits / doors
+    for(const [side,e] of Object.entries(r.exits)){
+      const locked = state.room==="foyer" && side==="right" && !state.fuse;
+      ctx.fillStyle=locked?"#3d2322":"#3e3a31";
+      ctx.fillRect(e.x,e.y,e.w,e.h);
+      ctx.strokeStyle=locked?"#793d3d":"#8d7d63";ctx.strokeRect(e.x,e.y,e.w,e.h);
+      if(locked){
+        ctx.fillStyle="#9e554e";ctx.font="14px Georgia";ctx.textAlign="center";ctx.fillText("LOCKED",e.x+e.w/2,e.y+e.h/2+5);
+      }
+    }
+  }
+
+  function drawFurniture(){
+    for(const f of getFurniture(state.room)){
+      if(f.type==="rug"){
+        ctx.fillStyle="#332a21";ctx.fillRect(f.x,f.y,f.w,f.h);
+        ctx.strokeStyle="#605040";ctx.strokeRect(f.x+4,f.y+4,f.w-8,f.h-8);
+      }else if(f.type==="table"||f.type==="bench"||f.type==="cabinet"||f.type==="crate"||f.type==="workbench"||f.type==="bookshelf"){
+        ctx.fillStyle=f.type==="crate"?"#4a3b2c":"#3c3328";
+        ctx.fillRect(f.x,f.y,f.w,f.h);ctx.strokeStyle="#695641";ctx.strokeRect(f.x,f.y,f.w,f.h);
+        ctx.strokeStyle="rgba(255,255,255,.08)";ctx.strokeRect(f.x+6,f.y+6,f.w-12,f.h-12);
+      }else if(f.type==="stairs"){
+        for(let i=0;i<8;i++){
+          ctx.fillStyle=`rgb(${50+i*3},${45+i*2},${38+i})`;
+          ctx.fillRect(f.x+i*7,f.y+i*10,f.w-i*14,f.h/8);
+        }
+      }
+    }
+  }
+
+  function drawItems(){
+    for(const it of items[state.room]){
+      if(it.used) continue;
+      ctx.save();ctx.translate(it.x,it.y);
+      const pulse=1+Math.sin(t*3+it.x)*.08;ctx.scale(pulse,pulse);
+      if(it.type==="key"){
+        ctx.strokeStyle="#c5a764";ctx.lineWidth=4;ctx.beginPath();ctx.arc(-6,0,7,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(2,0);ctx.lineTo(16,0);ctx.lineTo(16,6);ctx.moveTo(10,0);ctx.lineTo(10,5);ctx.stroke();
+      }else if(it.type==="ammo"){
+        ctx.fillStyle="#b7aa8c";ctx.fillRect(-10,-7,20,14);ctx.fillStyle="#71654f";ctx.fillRect(-7,-4,5,8);ctx.fillRect(2,-4,5,8);
+      }else if(it.type==="medkit"){
+        ctx.fillStyle="#d0c8bb";ctx.fillRect(-12,-9,24,18);ctx.fillStyle="#8e3333";ctx.fillRect(-2,-7,4,14);ctx.fillRect(-8,-2,16,4);
+      }else if(it.type==="fuse"){
+        ctx.fillStyle="#d1c0a2";ctx.fillRect(-8,-12,16,24);ctx.fillStyle="#7b9a8a";ctx.fillRect(-4,-8,8,16);
+      }else{
+        ctx.fillStyle="#d0c7b1";ctx.fillRect(-10,-13,20,26);ctx.strokeStyle="#554b3e";ctx.strokeRect(-10,-13,20,26);ctx.fillStyle="#655b4d";ctx.fillRect(-6,-7,12,2);ctx.fillRect(-6,0,12,2);
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawEnemy(e){
+    const shadowW=18+Math.max(0,60-dist(e,player))*.05;
+    ctx.save();
+    ctx.translate(e.x,e.y);
+    ctx.globalAlpha=e.dead?0.35:1;
+    ctx.fillStyle="rgba(0,0,0,.55)";ctx.beginPath();ctx.ellipse(0,12,shadowW,7,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=e.hit>0?"#6d4b43":"#26282a";
+    ctx.beginPath();ctx.ellipse(0,0,17,22,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#161718";ctx.beginPath();ctx.arc(0,-17,12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#8e302e";ctx.beginPath();ctx.arc(-4,-18,2.2,0,Math.PI*2);ctx.arc(4,-18,2.2,0,Math.PI*2);ctx.fill();
+    // tattered coat
+    ctx.fillStyle="#363737";ctx.beginPath();ctx.moveTo(-18,-2);ctx.lineTo(-12,22);ctx.lineTo(-3,14);ctx.lineTo(0,25);ctx.lineTo(5,14);ctx.lineTo(17,22);ctx.lineTo(18,-2);ctx.closePath();ctx.fill();
+    if(!e.dead){
+      ctx.fillStyle="#7b765e";ctx.fillRect(-18,-30,36,3);
+      ctx.fillStyle="#ab795f";ctx.fillRect(-18,-30,36*(e.hp/e.max),3);
+    }
+    ctx.restore();
+  }
+
+  function drawPlayer(){
+    ctx.save();ctx.translate(player.x,player.y);
+    ctx.fillStyle="rgba(0,0,0,.65)";ctx.beginPath();ctx.ellipse(0,15,22,8,0,0,Math.PI*2);ctx.fill();
+    ctx.rotate(player.angle);
+    ctx.fillStyle="#5a615f";ctx.beginPath();ctx.ellipse(0,2,16,20,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#b1a89a";ctx.beginPath();ctx.arc(0,-15,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#252628";ctx.fillRect(7,-4,18,5);
+    ctx.fillStyle="#d2b37d";ctx.fillRect(23,-4,6,5);
+    ctx.restore();
+  }
+
+  function drawLighting(){
+    const g=ctx.createRadialGradient(player.x,player.y,60,player.x,player.y,370);
+    g.addColorStop(0,"rgba(255,250,220,.15)");
+    g.addColorStop(.18,"rgba(210,200,170,.08)");
+    g.addColorStop(.58,"rgba(0,0,0,.22)");
+    g.addColorStop(1,"rgba(0,0,0,.72)");
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+    // flashlight cone
+    ctx.save();
+    ctx.translate(player.x,player.y);
+    ctx.rotate(player.angle);
+    const cone=ctx.createRadialGradient(95,0,10,175,0,265);
+    cone.addColorStop(0,"rgba(244,238,213,.22)");
+    cone.addColorStop(1,"rgba(244,238,213,0)");
+    ctx.fillStyle=cone;
+    ctx.beginPath();ctx.moveTo(0,-20);ctx.arc(0,0,285,-0.48,0.48);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+
+  function render(){
+    ctx.save();
+    if(shake>0){
+      ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+    }
+    drawBackground();
+    drawFurniture();
+    drawItems();
+
+    // Draw enemies sorted by y for a little depth illusion.
+    const es=[...enemies[state.room]].filter(e=>!e.dead||e.hit>0).sort((a,b)=>a.y-b.y);
+    es.forEach(drawEnemy);
+    drawPlayer();
+    drawLighting();
+    ctx.restore();
+  }
+
+  function gameLoop(now){
+    const dt=Math.min(.035,(now-last)/1000);last=now;t+=dt;
+    if(!paused && !ui.inventory.classList.contains("open")){
+      updatePlayer(dt);
+      updateEnemies(dt);
+      if(firing)fireCooldown();
+    }
+    shake=Math.max(0,shake-dt*22);
+    flash=Math.max(0,flash-dt*3.2);
+    redFlash=Math.max(0,redFlash-dt*2.8);
+    ui.flash.style.opacity=flash;
+    ui.redFlash.style.opacity=redFlash;
+    render();
+
+    const near=getNearestItem();
+    ui.interact.style.opacity=near||getNearbyEnemy()?"1":"0";
+    ui.interact.textContent=near ? "[E] Examine" : getNearbyEnemy() ? "Too close..." : "";
+    requestAnimationFrame(gameLoop);
+  }
+
+  let lastFire=0;
+  function fireCooldown(){
+    const now=performance.now();
+    if(now-lastFire>290){lastFire=now;fire();}
+  }
+
+  function setMouseFromEvent(e){
+    const r=canvas.getBoundingClientRect();
+    mouseX=(e.clientX-r.left)*(W/r.width);
+    mouseY=(e.clientY-r.top)*(H/r.height);
+  }
+
+  window.addEventListener("keydown",e=>{
+    const k=e.key.toLowerCase();
+    keys.add(k);
+    if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(k))e.preventDefault();
+
+    if(k==="e")interact();
+    if(k==="r")reload();
+    if(k==="i"||k==="escape"){
+      if(!paused){
+        ui.inventory.classList.toggle("open");
+        if(ui.inventory.classList.contains("open")) updateInventory();
+      }
+    }
+    if(k==="1"){state.selected=0;updateInventory();}
+    if(k==="2"){state.selected=1;updateInventory();}
+    if(k==="3"){
+      state.selected=2;updateInventory();
+      if(ui.inventory.classList.contains("open")) useMedkit();
+    }
+    if(k==="4"){state.selected=3;updateInventory();}
+    if(k==="5"){state.selected=4;updateInventory();}
+    if(k==="6"){state.selected=5;updateInventory();}
+    if(k==="f")fire();
+  });
+  window.addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
+  canvas.addEventListener("mousemove",setMouseFromEvent);
+  canvas.addEventListener("mousedown",e=>{if(e.button===0){firing=true;setMouseFromEvent(e);fire();}});
+  window.addEventListener("mouseup",e=>{if(e.button===0)firing=false;});
+  document.getElementById("startBtn").onclick=()=>{
+    ui.start.classList.add("hidden");
+    paused=false;
+    state.room="hall";
+    resetEnemies(); resetItems(); updateHUD(); updateInventory();
+    showMessage("The manor is waiting.",1500);
+  };
+
+  updateHUD();
+  updateInventory();
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+</body>
+</html>
