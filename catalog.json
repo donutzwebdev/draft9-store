@@ -108,5 +108,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/test-app.html"
+  },
+  {
+    "id": "my-app",
+    "name": "My App",
+    "icon": "gddf",
+    "description": "sfgfgsgfs",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/my-app.html"
   }
 ]
