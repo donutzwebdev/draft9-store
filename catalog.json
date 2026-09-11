@@ -108,5 +108,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/test-app.html"
+  },
+  {
+    "id": "virtualbox",
+    "name": "VirtualBox",
+    "icon": "VB",
+    "description": "",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/virtualbox.html"
   }
 ]
