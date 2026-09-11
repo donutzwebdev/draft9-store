@@ -108,35 +108,5 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/test-app.html"
-  },
-  {
-    "id": "virtualbox",
-    "name": "VirtualBox",
-    "icon": "VB",
-    "description": "",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/virtualbox.html"
-  },
-  {
-    "id": "resident-evil",
-    "name": "Resident evil",
-    "icon": "☣︎",
-    "description": "",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/resident-evil.html"
-  },
-  {
-    "id": "emulatorjs",
-    "name": "EmulatorJS",
-    "icon": "🕹️",
-    "description": "play roms and stuff you feel me",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/emulatorjs.html"
   }
 ]
