@@ -138,5 +138,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/portal.html"
+  },
+  {
+    "id": "vlc-media-player",
+    "name": "VLC Media Player",
+    "icon": "⚠️",
+    "description": "",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/vlc-media-player.html"
   }
 ]
