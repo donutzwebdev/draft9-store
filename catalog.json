@@ -108,5 +108,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/test-app.html"
+  },
+  {
+    "id": "resident-evil",
+    "name": "resident evil",
+    "icon": "☣︎",
+    "description": "netanyahu",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/resident-evil.html"
   }
 ]
