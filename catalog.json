@@ -148,5 +148,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/vlc-media-player.html"
+  },
+  {
+    "id": "night-web-ps1-web-player",
+    "name": "Night Web PS1 Web Player",
+    "icon": "🎮",
+    "description": "Bring your own BIOS and game dumps",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/night-web-ps1-web-player.html"
   }
 ]
