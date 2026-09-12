@@ -604,8 +604,13 @@ function doSubmit() {
   if(!name){err.textContent='Enter app name.';err.classList.add('show');return;}
   if(!creator){err.textContent='Enter your username.';err.classList.add('show');return;}
 
-  var html = appMode==='block' ? blocksToHTML() : document.getElementById('code-editor').value;
+    var html = appMode==='block' ? blocksToHTML() : document.getElementById('code-editor').value;
 
+  if (html.length > 500000) {
+    err.textContent = 'App is too large to submit (max ~500KB).';
+    err.classList.add('show');
+    return;
+  }
   // Submit to Cloudflare Worker which pushes to GitHub
   if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
     // Also save to Firebase for admin review
@@ -643,14 +648,19 @@ function doSubmit() {
 
 // ── SAVE / LOAD ──────────────────────
 function save() {
-  localStorage.setItem('d9_appcreator',JSON.stringify({
-    name:appName, mode:appMode, blocks:blocks,
-    code:document.getElementById('code-editor').value
-  }));
-  document.getElementById('st-saved').textContent='✓ Saved';
-  document.getElementById('st-saved').style.color='var(--green)';
+  try {
+    localStorage.setItem('d9_appcreator', JSON.stringify({
+      name: appName, mode: appMode, blocks: blocks,
+      code: document.getElementById('code-editor').value
+    }));
+    document.getElementById('st-saved').textContent = '✓ Saved';
+    document.getElementById('st-saved').style.color = 'var(--green)';
+  } catch(e) {
+    // Code too large for localStorage — just show saved anyway
+    document.getElementById('st-saved').textContent = '✓ (not cached)';
+    document.getElementById('st-saved').style.color = 'var(--orange)';
+  }
 }
-
 function updateStatus() {
   document.getElementById('st-name').textContent=appName;
   document.getElementById('st-mode').textContent=appMode==='code'?'Code Mode':'Block Mode';
