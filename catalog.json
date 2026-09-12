@@ -128,5 +128,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/silent-hill.html"
+  },
+  {
+    "id": "portal",
+    "name": "Portal",
+    "icon": "0",
+    "description": "",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/portal.html"
   }
 ]
