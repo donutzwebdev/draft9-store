@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Night Web PS1 Web Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #07070c;
+    --bg-glow: radial-gradient(60% 50% at 50% 0%, rgba(79,143,224,0.14), transparent 70%);
+    --panel: #111019;
+    --panel-2: #0c0b12;
+    --border: #242232;
+    --text: #eae7f4;
+    --text-muted: #86829c;
+    --green: #3fc98a;
+    --red: #e2564f;
+    --blue: #4f8fe0;
+    --pink: #d8579e;
+    --radius: 7px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image: var(--bg-glow);
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px 32px;
+  }
+
+  a { color: var(--blue); }
+
+  .wrap {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  /* ---------- header ---------- */
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 34px;
+  }
+
+  .mark {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+
+  .mark svg { position: absolute; width: 22px; height: 22px; }
+  .mark .tri    { top: 0;    left: 15px; }
+  .mark .circ   { top: 15px; left: 30px; }
+  .mark .cross  { top: 30px; left: 15px; }
+  .mark .square { top: 15px; left: 0;    }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mark .tri    { animation: drift 5s ease-in-out infinite; }
+    .mark .circ   { animation: drift 5s ease-in-out infinite -1.25s; }
+    .mark .cross  { animation: drift 5s ease-in-out infinite -2.5s; }
+    .mark .square { animation: drift 5s ease-in-out infinite -3.75s; }
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); opacity: .9; }
+    50%      { transform: translate(0, -3px); opacity: 1; }
+  }
+
+  h1 {
+    font-size: 21px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- setup panel ---------- */
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step:last-of-type { border-bottom: none; }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .step.done .step-num {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .step-body { flex: 1; min-width: 0; }
+
+  .step-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  .step-title span:first-child {
+    font-weight: 500;
+    font-size: 14.5px;
+  }
+
+  .step-hint {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .dropzone {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+  }
+
+  .dropzone:hover, .dropzone.drag {
+    border-color: var(--blue);
+    background: rgba(79,143,224,0.06);
+  }
+
+  .dropzone:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  .dropzone .dz-label { color: var(--text-muted); }
+  .dropzone .dz-files {
+    color: var(--text);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dropzone input[type=file] { display: none; }
+
+  /* ---------- action row ---------- */
+
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 16px 6px;
+    flex-wrap: wrap;
+  }
+
+  select#coreSelect {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  button#startBtn {
+    background: var(--green);
+    color: #06130c;
+    border: none;
+    border-radius: var(--radius);
+    padding: 11px 22px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: filter .15s ease, transform .05s ease;
+  }
+
+  button#startBtn:hover:not(:disabled) { filter: brightness(1.08); }
+  button#startBtn:active:not(:disabled) { transform: scale(.98); }
+
+  button#startBtn:disabled {
+    background: var(--panel-2);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    border: 1px solid var(--border);
+  }
+
+  button#startBtn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+  /* ---------- status log ---------- */
+
+  .log {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    padding: 14px 16px 16px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .log .err { color: var(--red); }
+  .log .ok { color: var(--green); }
+
+  footer {
+    max-width: 640px;
+    width: 100%;
+    margin-top: 22px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  footer strong { color: var(--text); font-weight: 500; }
+
+  /* ---------- stage (post-launch) ---------- */
+
+  .stage-wrap { display: none; width: 100%; max-width: 900px; }
+  .stage-wrap.active { display: block; }
+
+  .stage-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .stage-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .power-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+  }
+
+  .reset-link {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    padding: 7px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .reset-link:hover { border-color: var(--blue); color: var(--text); }
+
+  #game {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .stage-tip {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .setup-wrap.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap setup-wrap" id="setupWrap">
+  <header>
+    <div class="mark" aria-hidden="true">
+      <svg class="tri" viewBox="0 0 24 24"><polygon points="12,3 21,19 3,19" fill="none" stroke="var(--green)" stroke-width="2"/></svg>
+      <svg class="circ" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--red)" stroke-width="2"/></svg>
+      <svg class="cross" viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19" stroke="var(--blue)" stroke-width="2"/><line x1="19" y1="5" x2="5" y2="19" stroke="var(--blue)" stroke-width="2"/></svg>
+      <svg class="square" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" fill="none" stroke="var(--pink)" stroke-width="2"/></svg>
+    </div>
+    <div>
+      <h1>Night Web PS1 Web Player</h1>
+      <p>Runs entirely in your browser via the open-source EmulatorJS project. Bring your own BIOS and game dumps.</p>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="step" id="stepBios">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span>BIOS file</span></div>
+        <div class="step-hint">The console firmware, dumped from hardware you own. One file, usually .bin.</div>
+        <label class="dropzone" id="biosZone" tabindex="0">
+          <span class="dz-label">Drop file or click to choose</span>
+          <span class="dz-files" id="biosFileName"></span>
+          <input type="file" id="biosInput" accept=".bin,.zip">
+        </label>
+      </div>
+    </div>
+
+    <div class="step" id="stepGame">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span>Game file(s)</span></div>
+        <div class="step-hint">.bin+.cue, .pbp, .img, .m3u, .ccd, or .zip. Select every file for multi-track discs at once.</div>
+        <label class="dropzone" id="gameZone" tabindex="0">
+          <span class="dz-label">Drop file(s) or click to choose</span>
+          <span class="dz-files" id="gameFileName"></span>
+          <input type="file" id="gameInput" accept=".bin,.cue,.img,.mdf,.pbp,.toc,.cbn,.m3u,.ccd,.zip" multiple>
+        </label>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <select id="coreSelect" aria-label="Emulator core">
+        <option value="pcsx_rearmed">Core: fast (recommended)</option>
+        <option value="mednafen_psx_hw">Core: accurate (slower)</option>
+      </select>
+      <button id="startBtn" disabled>Power on</button>
+    </div>
+
+    <div class="log" id="statusLog">&gt; waiting for bios and game files</div>
+  </div>
+
+  <footer>
+    <strong>Nothing is uploaded.</strong> Your BIOS and game files stay in this browser tab. Only use dumps you're legally entitled to use.<br><br>
+    First launch downloads the PS1 core (a few MB) from the EmulatorJS CDN, so you'll need an internet connection once. If opening this file directly does nothing, some browsers block local pages from doing that — instead serve the folder with a local web server (e.g. <code>python3 -m http.server</code>) and open it at <code>http://localhost:8000</code>.
+  </footer>
+</div>
+
+<div class="wrap stage-wrap" id="stageWrap">
+  <div class="stage-head">
+    <div class="stage-title"><span class="power-dot"></span> <span id="stageGameName">Running</span></div>
+    <button class="reset-link" id="resetBtn">Load a different game</button>
+  </div>
+  <div id="game"></div>
+  <p class="stage-tip">Default keyboard controls are arrow keys plus Z / X / A / S. Click the gear icon inside the player to remap controls, connect a gamepad, use save states, or go fullscreen.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  let biosFile = null;
+  let gameFiles = [];
+
+  const biosInput = document.getElementById('biosInput');
+  const gameInput = document.getElementById('gameInput');
+  const biosZone = document.getElementById('biosZone');
+  const gameZone = document.getElementById('gameZone');
+  const biosFileName = document.getElementById('biosFileName');
+  const gameFileName = document.getElementById('gameFileName');
+  const startBtn = document.getElementById('startBtn');
+  const statusLog = document.getElementById('statusLog');
+  const stepBios = document.getElementById('stepBios');
+  const stepGame = document.getElementById('stepGame');
+  const setupWrap = document.getElementById('setupWrap');
+  const stageWrap = document.getElementById('stageWrap');
+  const stageGameName = document.getElementById('stageGameName');
+  const coreSelect = document.getElementById('coreSelect');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function formatBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function logLine(text, cls) {
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = '> ' + text;
+    statusLog.appendChild(line);
+    statusLog.scrollTop = statusLog.scrollHeight;
+  }
+
+  function clearLog() { statusLog.innerHTML = ''; }
+
+  function checkReady() {
+    startBtn.disabled = !(biosFile && gameFiles.length > 0);
+  }
+
+  function setupDropzone(zone, input, onFiles) {
+    zone.addEventListener('click', (e) => {
+      if (e.target !== input) input.click();
+    });
+    zone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
+    });
+    input.addEventListener('change', () => onFiles(input.files));
+    ['dragover', 'dragenter'].forEach(evt => zone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      zone.classList.add('drag');
+    }));
+    ['dragleave', 'drop'].forEach(evt => zone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag');
+    }));
+    zone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
+    });
+  }
+
+  setupDropzone(biosZone, biosInput, (files) => {
+    if (!files.length) return;
+    biosFile = files[0];
+    biosFileName.textContent = biosFile.name + ' · ' + formatBytes(biosFile.size);
+    stepBios.classList.add('done');
+    clearLog();
+    logLine('bios ready: ' + biosFile.name);
+    if (gameFiles.length) logLine('game ready: ' + gameFiles.map(f => f.name).join(', '));
+    checkReady();
+  });
+
+  setupDropzone(gameZone, gameInput, (files) => {
+    if (!files.length) return;
+    gameFiles = Array.from(files);
+    gameFileName.textContent = gameFiles.length === 1
+      ? gameFiles[0].name
+      : gameFiles.length + ' files';
+    stepGame.classList.add('done');
+    clearLog();
+    if (biosFile) logLine('bios ready: ' + biosFile.name);
+    logLine('game ready: ' + gameFiles.map(f => f.name).join(', '));
+    checkReady();
+  });
+
+  resetBtn.addEventListener('click', () => location.reload());
+
+  startBtn.addEventListener('click', async () => {
+    startBtn.disabled = true;
+    clearLog();
+    logLine('preparing bios...');
+
+    const biosUrl = URL.createObjectURL(biosFile);
+    let gameUrl, gameName;
+
+    if (gameFiles.length === 1) {
+      gameUrl = URL.createObjectURL(gameFiles[0]);
+      gameName = gameFiles[0].name;
+    } else {
+      logLine('bundling ' + gameFiles.length + ' files into one disc image...');
+      try {
+        const zip = new JSZip();
+        gameFiles.forEach(f => zip.file(f.name, f));
+        const blob = await zip.generateAsync({ type: 'blob' });
+        gameUrl = URL.createObjectURL(blob);
+        gameName = gameFiles[0].name.replace(/\.[^.]+$/, '') + '.zip';
+      } catch (err) {
+        logLine('could not bundle files: ' + err.message, 'err');
+        startBtn.disabled = false;
+        return;
+      }
+    }
+
+    window.EJS_player = '#game';
+    window.EJS_core = coreSelect.value;
+    window.EJS_biosUrl = biosUrl;
+    window.EJS_gameUrl = gameUrl;
+    window.EJS_gameName = gameName;
+    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/latest/data/';
+    window.EJS_startOnLoaded = true;
+    window.EJS_backgroundColor = '#000000';
+
+    stageGameName.textContent = gameName;
+    setupWrap.classList.add('hidden');
+    stageWrap.classList.add('active');
+
+    logLine('downloading emulator core (first load only)...');
+
+    const loaderTimeout = setTimeout(() => {
+      logLine('still working — if the screen stays black, your browser may be blocking the request. Try serving this file from a local web server instead of opening it directly.', 'err');
+    }, 12000);
+
+    const script = document.createElement('script');
+    script.src = window.EJS_pathtodata + 'loader.js';
+    script.onload = () => { clearTimeout(loaderTimeout); logLine('core loaded', 'ok'); };
+    script.onerror = () => {
+      clearTimeout(loaderTimeout);
+      logLine('could not reach the EmulatorJS CDN. Check your internet connection and try again.', 'err');
+    };
+    document.body.appendChild(script);
+  });
+</script>
+
+</body>
+</html>
