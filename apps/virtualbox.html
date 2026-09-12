@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title></title>
+<style>
+  :root{
+    --vbox-bg:#eef1f5;
+    --vbox-panel:#ffffff;
+    --vbox-border:#c9cfd6;
+    --vbox-sidebar:#f7f8fa;
+    --vbox-select:#3874d1;
+    --vbox-select-text:#ffffff;
+    --vbox-text:#1b1f24;
+    --vbox-subtext:#6b7280;
+    --vbox-green:#2e9e3f;
+    --vbox-grey:#8b8f96;
+    --vbox-toolbar:#f3f4f6;
+    --vbox-accent:#1e5cc8;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;background:var(--vbox-bg);color:var(--vbox-text);font-size:13px;overflow:hidden;}
+  .app{display:flex;flex-direction:column;height:100vh;border:1px solid var(--vbox-border);}
+
+  /* Menu bar */
+  .menubar{
+    background:var(--vbox-panel);border-bottom:1px solid var(--vbox-border);
+    display:flex;font-size:12.5px;flex-shrink:0;padding:2px 4px;
+  }
+  .menubar > div{padding:5px 10px;cursor:default;border-radius:3px;position:relative;}
+  .menubar > div:hover{background:#e8edf6;}
+  .menubar .dropdown{
+    display:none;position:absolute;top:100%;left:0;background:#fff;
+    border:1px solid var(--vbox-border);box-shadow:0 6px 18px rgba(0,0,0,.15);
+    min-width:210px;z-index:50;padding:4px 0;
+  }
+  .menubar > div:hover .dropdown{display:block;}
+  .dropdown .item{padding:6px 14px;display:flex;justify-content:space-between;color:var(--vbox-text);white-space:nowrap;}
+  .dropdown .item:hover{background:var(--vbox-select);color:#fff;}
+  .dropdown .item span.key{color:var(--vbox-subtext);font-size:11px;padding-left:20px;}
+  .dropdown .item:hover span.key{color:#dce6fb;}
+  .dropdown hr{border:none;border-top:1px solid #e3e6ea;margin:4px 0;}
+
+  /* Toolbar */
+  .toolbar{
+    background:var(--vbox-toolbar);border-bottom:1px solid var(--vbox-border);
+    display:flex;align-items:center;gap:4px;padding:6px 8px;flex-shrink:0;
+  }
+  .tbtn{
+    display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:4px;
+    cursor:pointer;color:var(--vbox-text);font-size:12.5px;user-select:none;
+  }
+  .tbtn:hover{background:#e2e8f3;}
+  .tbtn[disabled]{opacity:.35;pointer-events:none;}
+  .tbtn .ic{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;}
+  .tb-sep{width:1px;align-self:stretch;background:var(--vbox-border);margin:0 4px;}
+  .tb-spacer{flex:1;}
+  .tb-search{
+    border:1px solid var(--vbox-border);border-radius:4px;padding:4px 8px;font-size:12px;
+    background:#fff;width:170px;color:#333;
+  }
+
+  /* Main body */
+  .body{flex:1;display:flex;min-height:0;}
+  .sidebar{
+    width:270px;background:var(--vbox-sidebar);border-right:1px solid var(--vbox-border);
+    overflow-y:auto;flex-shrink:0;
+  }
+  .vm-group-title{padding:8px 12px 2px;font-size:11px;color:var(--vbox-subtext);text-transform:uppercase;letter-spacing:.5px;}
+  .vm-item{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;
+    border-left:3px solid transparent;margin:1px 4px;border-radius:4px;
+  }
+  .vm-item:hover{background:#e8edf6;}
+  .vm-item.active{background:var(--vbox-select);border-left-color:var(--vbox-accent);}
+  .vm-item.active .vm-name,.vm-item.active .vm-sub{color:#fff;}
+  .vm-icon{
+    width:34px;height:34px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;
+    justify-content:center;font-size:18px;background:#dfe7f5;color:#2b4c8c;
+  }
+  .vm-meta{overflow:hidden;}
+  .vm-name{font-weight:600;font-size:12.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .vm-sub{font-size:11.3px;color:var(--vbox-subtext);display:flex;align-items:center;gap:5px;}
+  .state-dot{width:7px;height:7px;border-radius:50%;background:var(--vbox-grey);display:inline-block;}
+  .state-dot.running{background:var(--vbox-green);}
+  .state-dot.paused{background:#e0a500;}
+
+  .empty-sidebar{padding:30px 18px;color:var(--vbox-subtext);font-size:12.5px;line-height:1.5;text-align:center;}
+
+  /* Detail pane */
+  .detail{flex:1;overflow-y:auto;padding:22px 30px;background:var(--vbox-panel);}
+  .detail-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+  .detail-header .vm-icon{width:44px;height:44px;font-size:22px;}
+  .detail-header h2{margin:0;font-size:19px;}
+  .detail-header .badge{
+    font-size:11px;padding:2px 8px;border-radius:10px;background:#e7f6ea;color:var(--vbox-green);
+    display:flex;align-items:center;gap:5px;margin-top:3px;width:fit-content;
+  }
+  .detail-header .badge.off{background:#eef0f2;color:var(--vbox-grey);}
+  .detail-header .badge.paused{background:#fdf1da;color:#9a6d00;}
+
+  .section{background:var(--vbox-sidebar);border:1px solid var(--vbox-border);border-radius:6px;margin-bottom:14px;}
+  .section h3{
+    margin:0;font-size:12.5px;padding:8px 14px;border-bottom:1px solid var(--vbox-border);
+    background:#eef1f5;border-radius:6px 6px 0 0;color:#3a3f47;
+  }
+  .kv-grid{display:grid;grid-template-columns:130px 1fr;gap:7px 14px;padding:12px 16px;font-size:12.5px;}
+  .kv-grid .k{color:var(--vbox-subtext);}
+  .kv-grid .v{color:var(--vbox-text);}
+
+  .no-vm{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--vbox-subtext);}
+  .no-vm .big-ic{font-size:48px;margin-bottom:12px;opacity:.5;}
+
+  /* Status bar */
+  .statusbar{
+    height:24px;background:var(--vbox-toolbar);border-top:1px solid var(--vbox-border);
+    display:flex;align-items:center;padding:0 12px;font-size:11px;color:var(--vbox-subtext);gap:16px;flex-shrink:0;
+  }
+  .statusbar .sicon{opacity:.8;}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,22,26,.45);display:none;
+    align-items:center;justify-content:center;z-index:200;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:#fff;border-radius:8px;width:640px;max-width:92vw;max-height:88vh;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden;
+  }
+  .modal-head{padding:14px 20px;border-bottom:1px solid var(--vbox-border);display:flex;align-items:center;justify-content:space-between;}
+  .modal-head h2{margin:0;font-size:15px;}
+  .modal-head .x{cursor:pointer;color:var(--vbox-subtext);font-size:18px;line-height:1;}
+  .modal-body{padding:18px 20px;overflow-y:auto;flex:1;}
+  .modal-foot{padding:12px 20px;border-top:1px solid var(--vbox-border);display:flex;justify-content:flex-end;gap:8px;}
+
+  .btn{padding:7px 16px;border-radius:4px;border:1px solid var(--vbox-border);background:#f5f6f8;cursor:pointer;font-size:12.5px;}
+  .btn:hover{background:#e9edf3;}
+  .btn.primary{background:var(--vbox-accent);color:#fff;border-color:var(--vbox-accent);}
+  .btn.primary:hover{background:#164ea8;}
+  .btn.danger{background:#d9463f;color:#fff;border-color:#d9463f;}
+
+  .form-row{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:10px;margin-bottom:12px;}
+  .form-row label{color:var(--vbox-subtext);font-size:12.5px;}
+  .form-row input[type=text],.form-row input[type=number],.form-row select{
+    padding:7px 9px;border:1px solid var(--vbox-border);border-radius:4px;font-size:12.5px;background:#fff;
+  }
+  .form-row input[type=range]{width:100%;}
+  .range-row{display:flex;align-items:center;gap:10px;}
+  .range-row .val{width:80px;font-size:12px;color:var(--vbox-subtext);}
+  .hint{font-size:11px;color:var(--vbox-subtext);margin-top:2px;}
+
+  /* Settings dialog specific */
+  .settings-body{display:flex;height:480px;}
+  .settings-tabs{width:170px;border-right:1px solid var(--vbox-border);background:var(--vbox-sidebar);flex-shrink:0;padding:8px 0;}
+  .settings-tabs .stab{padding:9px 16px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:9px;}
+  .settings-tabs .stab:hover{background:#e8edf6;}
+  .settings-tabs .stab.active{background:var(--vbox-select);color:#fff;}
+  .settings-pane{flex:1;padding:18px 22px;overflow-y:auto;}
+  .settings-pane h4{margin:0 0 14px;font-size:13.5px;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12.5px;}
+
+  /* VM display window */
+  .vm-window-overlay{
+    position:fixed;inset:0;background:#0b0c0e;display:none;flex-direction:column;z-index:300;
+  }
+  .vm-window-overlay.show{display:flex;}
+  .vm-window-bar{
+    background:#1c1f24;color:#ddd;padding:6px 10px;display:flex;align-items:center;font-size:12px;flex-shrink:0;
+  }
+  .vm-window-bar .title{flex:1;}
+  .vm-window-bar .btn-mini{
+    padding:4px 10px;border-radius:4px;background:#2c3138;margin-left:6px;cursor:pointer;color:#ddd;font-size:11.5px;
+  }
+  .vm-window-bar .btn-mini:hover{background:#3a4049;}
+  .vm-screen-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;position:relative;background:#000;}
+  #screen_container{background:#000;}
+  .vm-boot-msg{color:#8fb8ff;font-family:"Consolas",monospace;font-size:13px;text-align:center;max-width:560px;line-height:1.6;}
+  .vm-boot-msg .spinner{
+    width:28px;height:28px;border:3px solid #2c3a55;border-top-color:#5c9dff;border-radius:50%;
+    margin:0 auto 14px;animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:#c7cdd6;border-radius:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="menubar">
+    <div>File
+      <div class="dropdown">
+        <div class="item" onclick="openNewVMModal()">New Virtual Machine... <span class="key">Ctrl+N</span></div>
+        <div class="item">Import Appliance...</div>
+        <div class="item">Export Appliance...</div>
+        <hr>
+        <div class="item">Preferences... <span class="key">Ctrl+G</span></div>
+        <hr>
+        <div class="item">Exit <span class="key">Ctrl+Q</span></div>
+      </div>
+    </div>
+    <div>Machine
+      <div class="dropdown">
+        <div class="item" onclick="startVM()">Start <span class="key">Ctrl+T</span></div>
+        <div class="item" onclick="openSettingsModal()">Settings... <span class="key">Ctrl+S</span></div>
+        <div class="item" onclick="discardVM()">Remove...</div>
+        <hr>
+        <div class="item" onclick="cloneVM()">Clone...</div>
+        <div class="item">Move...</div>
+      </div>
+    </div>
+    <div>Help
+      <div class="dropdown">
+        <div class="item" onclick="alert('This is a self-contained HTML clone of the VirtualBox Manager UI, with a real in-browser x86 emulator (v86) for booting compatible ISOs. Not affiliated with Oracle.')">About VirtualBox Clone</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="tbtn" onclick="openNewVMModal()"><span class="ic">🖥️</span> New</div>
+    <div class="tbtn"><span class="ic">📁</span> Add</div>
+    <div class="tb-sep"></div>
+    <div class="tbtn" id="btn-settings" onclick="openSettingsModal()"><span class="ic">⚙️</span> Settings</div>
+    <div class="tbtn" id="btn-discard" onclick="discardVM()"><span class="ic">🗑️</span> Discard</div>
+    <div class="tb-sep"></div>
+    <div class="tbtn" id="btn-start" onclick="startVM()" style="color:#1f7a2e;font-weight:600;"><span class="ic">▶️</span> Start</div>
+    <div class="tb-spacer"></div>
+    <input class="tb-search" placeholder="Search machines...">
+  </div>
+
+  <div class="body">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="detail" id="detail"></div>
+  </div>
+
+  <div class="statusbar">
+    <span class="sicon">💾 Storage</span>
+    <span class="sicon">🖧 Network</span>
+    <span class="sicon">🎧 Audio</span>
+    <span class="sicon">🔌 USB</span>
+    <span class="sicon">📎 Shared folders</span>
+    <span style="margin-left:auto;">v86 engine ready</span>
+  </div>
+</div>
+
+<!-- New VM Modal -->
+<div class="modal-overlay" id="newvm-overlay">
+  <div class="modal">
+    <div class="modal-head"><h2>Create Virtual Machine</h2><span class="x" onclick="closeModal('newvm-overlay')">✕</span></div>
+    <div class="modal-body">
+      <div class="form-row"><label>Name</label><input type="text" id="nv-name" placeholder="e.g. My Linux VM"></div>
+      <div class="form-row"><label>OS Type</label>
+        <select id="nv-type">
+          <option value="linux">Linux</option>
+          <option value="windows">Windows</option>
+          <option value="bsd">BSD</option>
+          <option value="other">Other/Unknown</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Base Memory (MB)</label>
+        <div class="range-row"><input type="range" id="nv-ram" min="128" max="8192" step="128" value="2048" oninput="document.getElementById('nv-ram-val').textContent=this.value+' MB'"><span class="val" id="nv-ram-val">2048 MB</span></div>
+      </div>
+      <div class="form-row"><label>Processors</label>
+        <div class="range-row"><input type="range" id="nv-cpu" min="1" max="8" step="1" value="2" oninput="document.getElementById('nv-cpu-val').textContent=this.value+' CPU'"><span class="val" id="nv-cpu-val">2 CPU</span></div>
+      </div>
+      <div class="form-row"><label>Hard Disk (GB)</label>
+        <input type="number" id="nv-disk" value="25" min="1" max="2000">
+      </div>
+      <div class="form-row"><label>Boot ISO/Image</label>
+        <input type="file" id="nv-iso" accept=".iso,.img">
+      </div>
+      <div class="hint">Tip: v86 (the in-browser engine used to actually boot the disc) can run small Linux distros, FreeDOS, and similar lightweight x86 images well. Large modern OS ISOs (e.g. Windows) will not boot in-browser — this is a hardware/engine limitation, not a UI one.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('newvm-overlay')">Cancel</button>
+      <button class="btn primary" onclick="createVM()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-overlay">
+  <div class="modal" style="width:760px;">
+    <div class="modal-head"><h2 id="settings-title">Settings</h2><span class="x" onclick="closeModal('settings-overlay')">✕</span></div>
+    <div class="settings-body">
+      <div class="settings-tabs">
+        <div class="stab active" data-tab="general" onclick="switchSettingsTab('general')">🖥️ General</div>
+        <div class="stab" data-tab="system" onclick="switchSettingsTab('system')">⚙️ System</div>
+        <div class="stab" data-tab="display" onclick="switchSettingsTab('display')">🖼️ Display</div>
+        <div class="stab" data-tab="storage" onclick="switchSettingsTab('storage')">💾 Storage</div>
+        <div class="stab" data-tab="audio" onclick="switchSettingsTab('audio')">🎧 Audio</div>
+        <div class="stab" data-tab="network" onclick="switchSettingsTab('network')">🖧 Network</div>
+        <div class="stab" data-tab="usb" onclick="switchSettingsTab('usb')">🔌 USB</div>
+        <div class="stab" data-tab="shared" onclick="switchSettingsTab('shared')">📎 Shared Folders</div>
+      </div>
+      <div class="settings-pane" id="settings-pane"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('settings-overlay')">Cancel</button>
+      <button class="btn primary" onclick="saveSettings()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- VM Runtime Window -->
+<div class="vm-window-overlay" id="vm-window">
+  <div class="vm-window-bar">
+    <span class="title" id="vm-window-title">Running VM</span>
+    <span class="btn-mini" id="vm-reset-btn" onclick="resetVM()">Reset</span>
+    <span class="btn-mini" onclick="stopVM()">Power Off</span>
+  </div>
+  <div class="vm-screen-wrap" id="vm-screen-wrap">
+    <div class="vm-boot-msg" id="vm-boot-msg">
+      <div class="spinner"></div>
+      <div>Booting virtual machine…</div>
+    </div>
+    <div id="screen_container" style="display:none;">
+      <canvas></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/v86@0.5.458/build/libv86.js"></script>
+<script>
+// Compatibility shim: older/newer builds of v86 expose the emulator
+// constructor under different global names.
+if (typeof window.V86 === 'undefined' && typeof window.V86Starter !== 'undefined') {
+  window.V86 = window.V86Starter;
+}
+</script>
+<script>
+/* ---------- Data layer ---------- */
+const LS_KEY = 'vbox_clone_vms_v1';
+let vms = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+let selectedId = vms[0] ? vms[0].id : null;
+let isoFileHandles = {}; // id -> File object (in-memory, not persisted across reload)
+let currentEmulator = null;
+
+function saveVMs(){
+  const strip = vms.map(v => ({...v})); // File objects aren't stored, only metadata
+  localStorage.setItem(LS_KEY, JSON.stringify(strip));
+}
+
+function uid(){ return 'vm_' + Math.random().toString(36).slice(2,10); }
+
+const OS_ICON = { linux:'🐧', windows:'🪟', bsd:'😈', other:'💽' };
+
+function render(){
+  renderSidebar();
+  renderDetail();
+}
+
+function renderSidebar(){
+  const el = document.getElementById('sidebar');
+  if(vms.length === 0){
+    el.innerHTML = `<div class="empty-sidebar">No virtual machines yet.<br><br>Click <b>New</b> to create your first VM and attach an ISO.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="vm-group-title">Virtual Machines (${vms.length})</div>` + vms.map(v => `
+    <div class="vm-item ${v.id===selectedId?'active':''}" onclick="selectVM('${v.id}')">
+      <div class="vm-icon">${OS_ICON[v.type]||'💽'}</div>
+      <div class="vm-meta">
+        <div class="vm-name">${escapeHtml(v.name)}</div>
+        <div class="vm-sub"><span class="state-dot ${v.state}"></span> ${stateLabel(v.state)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function stateLabel(s){
+  return s==='running' ? 'Running' : s==='paused' ? 'Paused' : 'Powered Off';
+}
+
+function selectVM(id){ selectedId = id; render(); }
+
+function renderDetail(){
+  const el = document.getElementById('detail');
+  const vm = vms.find(v=>v.id===selectedId);
+  if(!vm){
+    el.innerHTML = `<div class="no-vm"><div class="big-ic">🖥️</div><div>Select a virtual machine to see its details,<br>or create a new one to get started.</div></div>`;
+    updateToolbarState(null);
+    return;
+  }
+  const badgeClass = vm.state==='running' ? '' : vm.state==='paused' ? 'paused' : 'off';
+  el.innerHTML = `
+    <div class="detail-header">
+      <div class="vm-icon">${OS_ICON[vm.type]||'💽'}</div>
+      <div>
+        <h2>${escapeHtml(vm.name)}</h2>
+        <div class="badge ${badgeClass}"><span class="state-dot ${vm.state}"></span> ${stateLabel(vm.state)}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>General</h3>
+      <div class="kv-grid">
+        <div class="k">Name</div><div class="v">${escapeHtml(vm.name)}</div>
+        <div class="k">OS Type</div><div class="v">${vm.type[0].toUpperCase()+vm.type.slice(1)}</div>
+        <div class="k">Boot Image</div><div class="v">${vm.isoName ? escapeHtml(vm.isoName) : '<span style="color:#9aa0a8">Not attached</span>'}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>System</h3>
+      <div class="kv-grid">
+        <div class="k">Base Memory</div><div class="v">${vm.ram} MB</div>
+        <div class="k">Processors</div><div class="v">${vm.cpu}</div>
+        <div class="k">Boot Order</div><div class="v">Optical, Hard Disk</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Storage</h3>
+      <div class="kv-grid">
+        <div class="k">Controller: SATA</div><div class="v">Virtual Disk — ${vm.disk} GB (dynamic)</div>
+        <div class="k">Controller: IDE</div><div class="v">${vm.isoName ? escapeHtml(vm.isoName) : 'Empty'}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Display</h3>
+      <div class="kv-grid">
+        <div class="k">Video Memory</div><div class="v">16 MB</div>
+        <div class="k">Graphics Controller</div><div class="v">VBoxVGA (emulated via canvas)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Audio / Network / USB</h3>
+      <div class="kv-grid">
+        <div class="k">Audio</div><div class="v">${vm.audio ? 'Enabled' : 'Disabled'}</div>
+        <div class="k">Network</div><div class="v">${vm.network}</div>
+        <div class="k">USB Controller</div><div class="v">${vm.usb}</div>
+      </div>
+    </div>
+  `;
+  updateToolbarState(vm);
+}
+
+function updateToolbarState(vm){
+  document.getElementById('btn-settings').toggleAttribute('disabled', !vm);
+  document.getElementById('btn-discard').toggleAttribute('disabled', !vm);
+  const startBtn = document.getElementById('btn-start');
+  startBtn.toggleAttribute('disabled', !vm || vm.state==='running');
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---------- New VM ---------- */
+function openNewVMModal(){
+  document.getElementById('nv-name').value = '';
+  document.getElementById('nv-type').value = 'linux';
+  document.getElementById('nv-ram').value = 2048;
+  document.getElementById('nv-ram-val').textContent = '2048 MB';
+  document.getElementById('nv-cpu').value = 2;
+  document.getElementById('nv-cpu-val').textContent = '2 CPU';
+  document.getElementById('nv-disk').value = 25;
+  document.getElementById('nv-iso').value = '';
+  document.getElementById('newvm-overlay').classList.add('show');
+}
+
+function createVM(){
+  const name = document.getElementById('nv-name').value.trim() || 'New Virtual Machine';
+  const type = document.getElementById('nv-type').value;
+  const ram = parseInt(document.getElementById('nv-ram').value,10);
+  const cpu = parseInt(document.getElementById('nv-cpu').value,10);
+  const disk = parseInt(document.getElementById('nv-disk').value,10) || 25;
+  const isoInput = document.getElementById('nv-iso');
+  const file = isoInput.files[0] || null;
+
+  const id = uid();
+  const vm = {
+    id, name, type, ram, cpu, disk,
+    isoName: file ? file.name : null,
+    state: 'off',
+    audio: true,
+    network: 'NAT',
+    usb: 'USB 3.0 (xHCI)'
+  };
+  vms.push(vm);
+  if(file) isoFileHandles[id] = file;
+  selectedId = id;
+  saveVMs();
+  closeModal('newvm-overlay');
+  render();
+}
+
+/* ---------- Settings ---------- */
+let currentSettingsTab = 'general';
+function openSettingsModal(){
+  const vm = vms.find(v=>v.id===selectedId);
+  if(!vm) return;
+  document.getElementById('settings-title').textContent = vm.name + ' - Settings';
+  document.querySelectorAll('.stab').forEach(s=>s.classList.remove('active'));
+  document.querySelector('.stab[data-tab="general"]').classList.add('active');
+  currentSettingsTab = 'general';
+  renderSettingsPane();
+  document.getElementById('settings-overlay').classList.add('show');
+}
+
+function switchSettingsTab(tab){
+  currentSettingsTab = tab;
+  document.querySelectorAll('.stab').forEach(s=>s.classList.toggle('active', s.dataset.tab===tab));
+  renderSettingsPane();
+}
+
+function renderSettingsPane(){
+  const vm = vms.find(v=>v.id===selectedId);
+  const pane = document.getElementById('settings-pane');
+  if(!vm){ pane.innerHTML=''; return; }
+  const panes = {
+    general: `
+      <h4>Basic</h4>
+      <div class="form-row"><label>Name</label><input type="text" id="st-name" value="${escapeHtml(vm.name)}"></div>
+      <div class="form-row"><label>OS Type</label>
+        <select id="st-type">
+          <option value="linux" ${vm.type==='linux'?'selected':''}>Linux</option>
+          <option value="windows" ${vm.type==='windows'?'selected':''}>Windows</option>
+          <option value="bsd" ${vm.type==='bsd'?'selected':''}>BSD</option>
+          <option value="other" ${vm.type==='other'?'selected':''}>Other/Unknown</option>
+        </select>
+      </div>`,
+    system: `
+      <h4>Motherboard</h4>
+      <div class="form-row"><label>Base Memory (MB)</label>
+        <div class="range-row"><input type="range" id="st-ram" min="128" max="8192" step="128" value="${vm.ram}" oninput="document.getElementById('st-ram-val').textContent=this.value+' MB'"><span class="val" id="st-ram-val">${vm.ram} MB</span></div>
+      </div>
+      <div class="form-row"><label>Boot Order</label><select><option>Optical, Hard Disk</option><option>Hard Disk, Optical</option></select></div>
+      <h4 style="margin-top:18px;">Processor</h4>
+      <div class="form-row"><label>Processors</label>
+        <div class="range-row"><input type="range" id="st-cpu" min="1" max="8" value="${vm.cpu}" oninput="document.getElementById('st-cpu-val').textContent=this.value+' CPU'"><span class="val" id="st-cpu-val">${vm.cpu} CPU</span></div>
+      </div>`,
+    display: `
+      <h4>Screen</h4>
+      <div class="form-row"><label>Video Memory</label><input type="number" value="16" disabled> </div>
+      <div class="checkbox-row"><input type="checkbox" checked disabled> Enable 3D Acceleration (not supported in-browser)</div>
+      <div class="hint">Rendering is handled by an HTML canvas via the v86 emulator.</div>`,
+    storage: `
+      <h4>Storage Devices</h4>
+      <div class="form-row"><label>Optical Drive (ISO)</label><input type="file" id="st-iso" accept=".iso,.img"></div>
+      <div class="hint">${vm.isoName ? 'Currently attached: ' + escapeHtml(vm.isoName) : 'No image currently attached.'}</div>
+      <div class="form-row" style="margin-top:14px;"><label>Hard Disk (GB)</label><input type="number" id="st-disk" value="${vm.disk}" min="1" max="2000"></div>`,
+    audio: `
+      <h4>Audio</h4>
+      <div class="checkbox-row"><input type="checkbox" id="st-audio" ${vm.audio?'checked':''}> Enable Audio</div>
+      <div class="form-row"><label>Host Driver</label><select><option>Default</option></select></div>`,
+    network: `
+      <h4>Adapter 1</h4>
+      <div class="form-row"><label>Attached to</label>
+        <select id="st-network">
+          <option ${vm.network==='NAT'?'selected':''}>NAT</option>
+          <option ${vm.network==='Bridged Adapter'?'selected':''}>Bridged Adapter</option>
+          <option ${vm.network==='Host-only Adapter'?'selected':''}>Host-only Adapter</option>
+          <option ${vm.network==='Not attached'?'selected':''}>Not attached</option>
+        </select>
+      </div>
+      <div class="hint">Simulated networking metadata only — no real network bridging occurs in-browser.</div>`,
+    usb: `
+      <h4>USB Controller</h4>
+      <div class="form-row"><label>Controller</label>
+        <select id="st-usb">
+          <option ${vm.usb.includes('2.0')?'selected':''}>USB 2.0 (OHCI + EHCI)</option>
+          <option ${vm.usb.includes('3.0')?'selected':''}>USB 3.0 (xHCI)</option>
+          <option ${vm.usb==='Disabled'?'selected':''}>Disabled</option>
+        </select>
+      </div>`,
+    shared: `
+      <h4>Shared Folders</h4>
+      <div class="hint">No shared folders configured. (Folder sharing between host and guest isn't available in the in-browser engine.)</div>`
+  };
+  pane.innerHTML = panes[currentSettingsTab] || '';
+}
+
+function saveSettings(){
+  const vm = vms.find(v=>v.id===selectedId);
+  if(!vm) return;
+  if(currentSettingsTab==='general'){
+    vm.name = document.getElementById('st-name').value.trim() || vm.name;
+    vm.type = document.getElementById('st-type').value;
+  } else if(currentSettingsTab==='system'){
+    vm.ram = parseInt(document.getElementById('st-ram').value,10);
+    vm.cpu = parseInt(document.getElementById('st-cpu').value,10);
+  } else if(currentSettingsTab==='storage'){
+    const f = document.getElementById('st-iso').files[0];
+    if(f){ vm.isoName = f.name; isoFileHandles[vm.id] = f; }
+    vm.disk = parseInt(document.getElementById('st-disk').value,10) || vm.disk;
+  } else if(currentSettingsTab==='audio'){
+    vm.audio = document.getElementById('st-audio').checked;
+  } else if(currentSettingsTab==='network'){
+    vm.network = document.getElementById('st-network').value;
+  } else if(currentSettingsTab==='usb'){
+    vm.usb = document.getElementById('st-usb').value;
+  }
+  saveVMs();
+  closeModal('settings-overlay');
+  render();
+}
+
+function discardVM(){
+  const vm = vms.find(v=>v.id===selectedId);
+  if(!vm) return;
+  if(!confirm(`Permanently delete "${vm.name}"? This cannot be undone.`)) return;
+  vms = vms.filter(v=>v.id!==vm.id);
+  delete isoFileHandles[vm.id];
+  selectedId = vms[0] ? vms[0].id : null;
+  saveVMs();
+  render();
+}
+
+function cloneVM(){
+  const vm = vms.find(v=>v.id===selectedId);
+  if(!vm) return;
+  const copy = {...vm, id:uid(), name: vm.name + ' Clone', state:'off'};
+  vms.push(copy);
+  saveVMs();
+  render();
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+/* ---------- Start / VM runtime via v86 ---------- */
+function startVM(){
+  const vm = vms.find(v=>v.id===selectedId);
+  if(!vm) return;
+  vm.state = 'running';
+  saveVMs();
+  render();
+
+  document.getElementById('vm-window-title').textContent = vm.name + ' [Running] — Oracle VM VirtualBox';
+  document.getElementById('vm-window').classList.add('show');
+  document.getElementById('vm-boot-msg').style.display = 'block';
+  document.getElementById('vm-boot-msg').innerHTML = `<div class="spinner"></div><div>Booting "${escapeHtml(vm.name)}"…</div>`;
+  document.getElementById('screen_container').style.display = 'none';
+
+  const file = isoFileHandles[vm.id];
+
+  if(!file){
+    document.getElementById('vm-boot-msg').innerHTML = `
+      <div style="font-size:30px;margin-bottom:10px;">⚠️</div>
+      <div>No boot image attached to this VM.<br>Open <b>Settings → Storage</b> and attach an ISO, then start again.</div>`;
+    vm.state = 'off'; saveVMs(); render();
+    return;
+  }
+
+  file.arrayBuffer().then(buf => {
+    try {
+      if(currentEmulator){ try{ currentEmulator.stop(); }catch(e){} currentEmulator = null; }
+      currentEmulator = new V86({
+        wasm_path: "https://cdn.jsdelivr.net/npm/v86@0.5.458/build/v86.wasm",
+        bios: { url: "https://cdn.jsdelivr.net/gh/copy/v86@latest/bios/seabios.bin" },
+        vga_bios: { url: "https://cdn.jsdelivr.net/gh/copy/v86@latest/bios/vgabios.bin" },
+        memory_size: Math.max(vm.ram, 128) * 1024 * 1024,
+        vga_memory_size: 8 * 1024 * 1024,
+        screen_container: document.getElementById('screen_container'),
+        cdrom: { buffer: buf },
+        autostart: true,
+      });
+      currentEmulator.add_listener('emulator-ready', () => {
+        document.getElementById('vm-boot-msg').style.display = 'none';
+        document.getElementById('screen_container').style.display = 'block';
+      });
+    } catch(err){
+      document.getElementById('vm-boot-msg').innerHTML = `
+        <div style="font-size:30px;margin-bottom:10px;">⚠️</div>
+        <div>The emulator engine failed to start:<br>${escapeHtml(err.message||String(err))}</div>
+        <div class="hint" style="margin-top:10px;">This in-browser engine (v86) only supports a subset of x86 ISOs — small Linux/BSD/DOS builds work best.</div>`;
+      vm.state = 'off'; saveVMs(); render();
+    }
+  });
+}
+
+function stopVM(){
+  const vm = vms.find(v=>v.id===selectedId);
+  if(currentEmulator){ try{ currentEmulator.stop(); }catch(e){} currentEmulator = null; }
+  document.getElementById('vm-window').classList.remove('show');
+  if(vm){ vm.state='off'; saveVMs(); render(); }
+}
+
+function resetVM(){
+  if(currentEmulator){ try{ currentEmulator.restart(); }catch(e){} }
+}
+
+render();
+</script>
+</body>
+</html>
