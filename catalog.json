@@ -118,5 +118,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/resident-evil.html"
+  },
+  {
+    "id": "silent-hill",
+    "name": "silent hill",
+    "icon": "🌫️",
+    "description": "",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/silent-hill.html"
   }
 ]
