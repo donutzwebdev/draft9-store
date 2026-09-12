@@ -176,6 +176,14 @@
   .vm-window-bar .btn-mini:hover{background:#3a4049;}
   .vm-screen-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;position:relative;background:#000;}
   #screen_container{background:#000;}
+  .mouse-hint{
+    position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+    background:rgba(20,22,26,.85);color:#cfd6e0;font-size:11.5px;padding:6px 14px;
+    border-radius:20px;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;z-index:5;
+  }
+  .mouse-hint.show{opacity:1;}
+  .vm-screen-wrap.captured .mouse-hint{background:rgba(46,158,63,.85);color:#fff;}
   .vm-boot-msg{color:#8fb8ff;font-family:"Consolas",monospace;font-size:13px;text-align:center;max-width:560px;line-height:1.6;}
   .vm-boot-msg .spinner{
     width:28px;height:28px;border:3px solid #2c3a55;border-top-color:#5c9dff;border-radius:50%;
@@ -318,9 +326,8 @@
       <div class="spinner"></div>
       <div>Booting virtual machine…</div>
     </div>
-    <div id="screen_container" style="display:none;">
-      <canvas></canvas>
-    </div>
+    <div id="screen_container" style="display:none;"></div>
+    <div class="mouse-hint" id="mouse-hint">🖱️ Click to capture mouse — press <b>Esc</b> to release</div>
   </div>
 </div>
 
@@ -662,6 +669,7 @@ function startVM(){
       currentEmulator.add_listener('emulator-ready', () => {
         document.getElementById('vm-boot-msg').style.display = 'none';
         document.getElementById('screen_container').style.display = 'block';
+        document.getElementById('mouse-hint').classList.add('show');
       });
     } catch(err){
       document.getElementById('vm-boot-msg').innerHTML = `
@@ -673,10 +681,35 @@ function startVM(){
   });
 }
 
+/* ---------- Mouse capture (pointer lock) ---------- */
+const screenWrap = document.getElementById('vm-screen-wrap');
+const mouseHint = document.getElementById('mouse-hint');
+
+screenWrap.addEventListener('click', () => {
+  const container = document.getElementById('screen_container');
+  if(!currentEmulator) return;
+  if(document.pointerLockElement !== container){
+    container.requestPointerLock =
+      container.requestPointerLock || container.mozRequestPointerLock;
+    if(container.requestPointerLock) container.requestPointerLock();
+  }
+});
+
+document.addEventListener('pointerlockchange', () => {
+  const container = document.getElementById('screen_container');
+  const locked = document.pointerLockElement === container;
+  screenWrap.classList.toggle('captured', locked);
+  mouseHint.textContent = locked
+    ? '🔒 Mouse captured — press Esc to release'
+    : '🖱️ Click to capture mouse — press Esc to release';
+});
+
 function stopVM(){
   const vm = vms.find(v=>v.id===selectedId);
+  if(document.pointerLockElement){ document.exitPointerLock(); }
   if(currentEmulator){ try{ currentEmulator.stop(); }catch(e){} currentEmulator = null; }
   document.getElementById('vm-window').classList.remove('show');
+  document.getElementById('mouse-hint').classList.remove('show');
   if(vm){ vm.state='off'; saveVMs(); render(); }
 }
 
