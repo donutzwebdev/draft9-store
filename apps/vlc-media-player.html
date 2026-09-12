@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VLC media player</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --chrome:#fff;
+    --menubar:#fff;
+    --text:#222;
+    --accent:#ff8800;
+    --btnhover:rgba(255,136,0,.15);
+  }
+  *{box-sizing:border-box;}
+  html, body{height:100%;}
+  body{
+    margin:0; padding:0; background:#fff; color:var(--text);
+    font-family:"Segoe UI", Arial, sans-serif;
+    display:flex; flex-direction:column;
+    min-height:100vh;
+  }
+  #app{
+    width:100%; max-width:none; background:var(--chrome);
+    overflow:hidden; flex:1; display:flex; flex-direction:column;
+  }
+
+  #menubar{
+    background:var(--menubar);
+    display:flex; font-size:13px; padding:2px 4px; position:relative; user-select:none;
+  }
+  .menu-item{padding:4px 10px; cursor:pointer; position:relative; border-radius:2px;}
+  .menu-item:hover, .menu-item.open{background:var(--btnhover);}
+  .dropdown{
+    display:none; position:absolute; top:100%; left:0; background:#fff;
+    box-shadow:2px 3px 8px rgba(0,0,0,.25); min-width:190px;
+    z-index:50; padding:3px 0;
+  }
+  .menu-item.open .dropdown{display:block;}
+  .dropdown .opt{padding:6px 16px; font-size:13px; cursor:pointer; white-space:nowrap; display:flex; justify-content:space-between; gap:20px; color:var(--text);}
+  .dropdown .opt:hover{background:var(--accent); color:#fff;}
+  .dropdown .sep{height:1px; background:rgba(255,136,0,.25); margin:3px 0;}
+  .dropdown .opt.disabled{color:rgba(0,0,0,.3); cursor:default;}
+  .dropdown .opt.disabled:hover{background:none; color:rgba(0,0,0,.3);}
+  .dropdown .shortcut{color:rgba(0,0,0,.4); font-size:11px;}
+  .dropdown .opt:hover .shortcut{color:#fff;}
+
+  #video-container{
+    position:relative; width:100%; background:#000;
+    display:flex; align-items:center; justify-content:center;
+    flex:1; min-height:0; overflow:hidden;
+  }
+  video{width:100%; height:100%; display:block; background:#000; object-fit:contain;}
+  #splash{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; background:#000; transition:opacity .25s;
+  }
+  #splash img{width:150px; height:150px; filter:drop-shadow(0 0 20px rgba(255,136,0,.15));}
+  #splash.hidden{opacity:0; pointer-events:none; display:none;}
+  #drop-note{color:rgba(255,255,255,.5); font-size:.8em; margin-top:14px; text-align:center; max-width:340px;}
+
+  #seek-row{ padding:2px 10px 0; background:var(--chrome); }
+  #seek{
+    width:100%; -webkit-appearance:none; height:4px; border-radius:2px; background:#ffe0b3; outline:none; cursor:pointer; margin:6px 0 2px;
+  }
+  #seek::-webkit-slider-thumb{-webkit-appearance:none; width:11px; height:11px; border-radius:50%; background:var(--accent); cursor:pointer;}
+  #seek::-moz-range-thumb{width:11px; height:11px; border-radius:50%; background:var(--accent); border:none; cursor:pointer;}
+  #time-row{display:flex; justify-content:space-between; font-size:11px; color:rgba(0,0,0,.5); padding:0 2px 4px;}
+
+  #controls{
+    background:var(--chrome); display:flex; align-items:center; gap:6px;
+    padding:6px 10px 10px;
+  }
+  .ctrl-btn{
+    width:30px; height:28px; display:flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid transparent; border-radius:3px; cursor:pointer; font-size:15px; color:var(--text);
+  }
+  .ctrl-btn:hover{background:var(--btnhover);}
+  .ctrl-btn.active{color:var(--accent);}
+  .ctrl-btn.big{font-size:17px;}
+  #controls .spacer{flex:1;}
+  #vol-wrap{display:flex; align-items:center; gap:4px; width:150px;}
+  #volume{
+    flex:1; -webkit-appearance:none; height:5px; border-radius:2px; cursor:pointer;
+    background:linear-gradient(to right, var(--accent) 0%, var(--accent) 100%, #ffe0b3 100%, #ffe0b3 100%);
+  }
+  #volume::-webkit-slider-thumb{-webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--accent); cursor:pointer;}
+  #vol-pct{font-size:11px; color:rgba(0,0,0,.5); width:34px;}
+
+  input[type=file]{display:none;}
+  #fname-bar{font-size:11px; color:rgba(0,0,0,.5); padding:2px 12px 0; background:var(--chrome); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <div id="menubar">
+    <div class="menu-item" data-menu="media">Media
+      <div class="dropdown">
+        <div class="opt" id="opt-open-file">Open File...<span class="shortcut">Ctrl+O</span></div>
+        <div class="opt disabled">Open Multiple Files...<span class="shortcut">Ctrl+Shift+O</span></div>
+        <div class="opt disabled">Open Folder...<span class="shortcut">Ctrl+F</span></div>
+        <div class="opt disabled">Open Disc...<span class="shortcut">Ctrl+D</span></div>
+        <div class="opt disabled">Open Network Stream...<span class="shortcut">Ctrl+N</span></div>
+        <div class="sep"></div>
+        <div class="opt" id="opt-load-sub">Load Subtitle File...</div>
+        <div class="sep"></div>
+        <div class="opt" id="opt-close">Close</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="playback">Playback
+      <div class="dropdown">
+        <div class="opt" id="opt-play">Play/Pause<span class="shortcut">Space</span></div>
+        <div class="opt" id="opt-stop">Stop<span class="shortcut">S</span></div>
+        <div class="opt" id="opt-nextframe">Frame by Frame<span class="shortcut">E</span></div>
+        <div class="sep"></div>
+        <div class="opt" id="opt-jumpfwd">Jump Forward<span class="shortcut">→</span></div>
+        <div class="opt" id="opt-jumpback">Jump Backward<span class="shortcut">←</span></div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="audio">Audio
+      <div class="dropdown">
+        <div class="opt" id="opt-mute">Mute<span class="shortcut">M</span></div>
+        <div class="opt" id="opt-volup">Increase Volume<span class="shortcut">↑</span></div>
+        <div class="opt" id="opt-voldown">Decrease Volume<span class="shortcut">↓</span></div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="video">Video
+      <div class="dropdown">
+        <div class="opt" id="opt-fullscreen">Fullscreen<span class="shortcut">F</span></div>
+        <div class="opt" id="opt-snapshot">Take Snapshot<span class="shortcut">Shift+S</span></div>
+        <div class="opt" id="opt-pip">Picture-in-Picture</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="subtitle">Subtitle
+      <div class="dropdown">
+        <div class="opt" id="opt-load-sub2">Add Subtitle File...</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="tools">Tools
+      <div class="dropdown">
+        <div class="opt" id="opt-loop">Toggle Loop</div>
+        <div class="opt disabled">Preferences...</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="view">View
+      <div class="dropdown">
+        <div class="opt disabled">Playlist</div>
+        <div class="opt disabled">Minimal Interface</div>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="help">Help
+      <div class="dropdown">
+        <div class="opt disabled">About VLC media player</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="video-container">
+    <video id="video" playsinline></video>
+    <div id="splash">
+      <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/VLC_Icon.svg/960px-VLC_Icon.svg.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail" alt="VLC cone">
+      <div id="drop-note">No media loaded — use Media &gt; Open File..., or drag a video file in here</div>
+    </div>
+  </div>
+
+  <div id="fname-bar">No media loaded</div>
+
+  <div id="seek-row">
+    <input type="range" id="seek" min="0" max="100" value="0" step="0.01">
+    <div id="time-row"><span id="time-current">00:00</span><span id="time-total">00:00</span></div>
+  </div>
+
+  <div id="controls">
+    <button class="ctrl-btn" id="btn-prevframe" title="Previous Frame">⏮</button>
+    <button class="ctrl-btn big" id="btn-stop" title="Stop">⏹</button>
+    <button class="ctrl-btn big" id="btn-playpause" title="Play/Pause (Space)">▶</button>
+    <button class="ctrl-btn" id="btn-nextframe" title="Next Frame">⏭</button>
+    <button class="ctrl-btn" id="btn-fullscreen" title="Fullscreen (F)">⛶</button>
+    <button class="ctrl-btn" id="btn-pip" title="Picture-in-Picture">🗔</button>
+    <button class="ctrl-btn" id="btn-loop" title="Loop">🔁</button>
+    <button class="ctrl-btn" id="btn-snapshot" title="Snapshot">📸</button>
+    <select id="speed" title="Playback speed" style="margin-left:2px; font-size:12px;">
+      <option value="0.25">0.25x</option>
+      <option value="0.5">0.5x</option>
+      <option value="0.75">0.75x</option>
+      <option value="1" selected>1x</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="1.75">1.75x</option>
+      <option value="2">2x</option>
+    </select>
+    <div class="spacer"></div>
+    <div id="vol-wrap">
+      <button class="ctrl-btn" id="btn-mute" title="Mute (M)">🔊</button>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+      <span id="vol-pct">100%</span>
+    </div>
+  </div>
+
+</div>
+
+<input type="file" id="file-input" accept="video/*">
+<input type="file" id="sub-input" accept=".vtt">
+
+<script>
+(function(){
+  const video = document.getElementById('video');
+  const seek = document.getElementById('seek');
+  const timeCurrent = document.getElementById('time-current');
+  const timeTotal = document.getElementById('time-total');
+  const splash = document.getElementById('splash');
+  const fnameBar = document.getElementById('fname-bar');
+  const container = document.getElementById('video-container');
+
+  const fileInput = document.getElementById('file-input');
+  const subInput = document.getElementById('sub-input');
+  const btnPlayPause = document.getElementById('btn-playpause');
+  const btnStop = document.getElementById('btn-stop');
+  const btnPrevFrame = document.getElementById('btn-prevframe');
+  const btnNextFrame = document.getElementById('btn-nextframe');
+  const btnMute = document.getElementById('btn-mute');
+  const volume = document.getElementById('volume');
+  const volPct = document.getElementById('vol-pct');
+  const speed = document.getElementById('speed');
+  const btnLoop = document.getElementById('btn-loop');
+  const btnSnapshot = document.getElementById('btn-snapshot');
+  const btnPip = document.getElementById('btn-pip');
+  const btnFullscreen = document.getElementById('btn-fullscreen');
+
+  let isSeeking = false;
+  const FRAME_TIME = 1/30;
+  let currentUrl = null;
+
+  function fmt(t){
+    if(!isFinite(t) || isNaN(t)) return "00:00";
+    const h = Math.floor(t/3600);
+    const m = Math.floor((t%3600)/60);
+    const s = Math.floor(t%60);
+    const pad = n => String(n).padStart(2,'0');
+    return h>0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  }
+
+  function showSplash(show){
+    splash.classList.toggle('hidden', !show);
+  }
+
+  function loadFile(file){
+    if(!file) return;
+    if(currentUrl) URL.revokeObjectURL(currentUrl);
+    currentUrl = URL.createObjectURL(file);
+    video.src = currentUrl;
+    fnameBar.textContent = file.name;
+    showSplash(true);
+    video.load();
+    video.play().catch(()=>{});
+  }
+
+  const menuItems = document.querySelectorAll('.menu-item');
+  menuItems.forEach(item=>{
+    item.addEventListener('click', e=>{
+      const wasOpen = item.classList.contains('open');
+      menuItems.forEach(m=>m.classList.remove('open'));
+      if(!wasOpen) item.classList.add('open');
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener('click', ()=> menuItems.forEach(m=>m.classList.remove('open')));
+
+  document.getElementById('opt-open-file').addEventListener('click', ()=> fileInput.click());
+  document.getElementById('opt-load-sub').addEventListener('click', ()=> subInput.click());
+  document.getElementById('opt-load-sub2').addEventListener('click', ()=> subInput.click());
+  document.getElementById('opt-close').addEventListener('click', ()=>{
+    video.pause(); video.removeAttribute('src'); video.load();
+    fnameBar.textContent = 'No media loaded';
+    showSplash(true);
+  });
+
+  fileInput.addEventListener('change', e=>{
+    if(e.target.files[0]) loadFile(e.target.files[0]);
+  });
+
+  ['dragenter','dragover'].forEach(evt=>{
+    container.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); });
+  });
+  container.addEventListener('drop', e=>{
+    e.preventDefault(); e.stopPropagation();
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+
+  function togglePlay(){
+    if(!video.src) return;
+    if(video.paused) video.play(); else video.pause();
+  }
+  document.getElementById('opt-play').addEventListener('click', togglePlay);
+  document.getElementById('opt-stop').addEventListener('click', ()=>{ video.pause(); video.currentTime = 0; });
+  document.getElementById('opt-nextframe').addEventListener('click', ()=> btnNextFrame.click());
+  document.getElementById('opt-jumpfwd').addEventListener('click', ()=>{ video.currentTime = Math.min(video.duration||0, video.currentTime+5); });
+  document.getElementById('opt-jumpback').addEventListener('click', ()=>{ video.currentTime = Math.max(0, video.currentTime-5); });
+
+  document.getElementById('opt-mute').addEventListener('click', ()=> btnMute.click());
+  document.getElementById('opt-volup').addEventListener('click', ()=>{ video.volume = Math.min(1, video.volume+0.1); syncVolumeUI(); });
+  document.getElementById('opt-voldown').addEventListener('click', ()=>{ video.volume = Math.max(0, video.volume-0.1); syncVolumeUI(); });
+
+  document.getElementById('opt-fullscreen').addEventListener('click', ()=> btnFullscreen.click());
+  document.getElementById('opt-snapshot').addEventListener('click', ()=> btnSnapshot.click());
+  document.getElementById('opt-pip').addEventListener('click', ()=> btnPip.click());
+
+  document.getElementById('opt-loop').addEventListener('click', ()=> btnLoop.click());
+
+  btnPlayPause.addEventListener('click', togglePlay);
+  video.addEventListener('play', ()=>{ btnPlayPause.textContent = '⏸'; showSplash(false); });
+  video.addEventListener('pause', ()=> btnPlayPause.textContent = '▶');
+  video.addEventListener('waiting', ()=> showSplash(false));
+
+  btnStop.addEventListener('click', ()=>{ video.pause(); video.currentTime = 0; });
+
+  btnPrevFrame.addEventListener('click', ()=>{
+    video.pause();
+    video.currentTime = Math.max(0, video.currentTime - FRAME_TIME);
+  });
+  btnNextFrame.addEventListener('click', ()=>{
+    video.pause();
+    video.currentTime = Math.min(video.duration || 0, video.currentTime + FRAME_TIME);
+  });
+
+  video.addEventListener('loadedmetadata', ()=>{
+    seek.max = video.duration || 0;
+    timeTotal.textContent = fmt(video.duration);
+  });
+  video.addEventListener('timeupdate', ()=>{
+    if(!isSeeking) seek.value = video.currentTime;
+    timeCurrent.textContent = fmt(video.currentTime);
+  });
+  seek.addEventListener('mousedown', ()=> isSeeking = true);
+  seek.addEventListener('touchstart', ()=> isSeeking = true);
+  seek.addEventListener('input', ()=>{ timeCurrent.textContent = fmt(seek.value); });
+  seek.addEventListener('change', ()=>{ video.currentTime = parseFloat(seek.value); isSeeking = false; });
+
+  video.addEventListener('ended', ()=>{ if(!video.loop) showSplash(true); });
+
+  function syncVolumeUI(){
+    volume.value = video.volume;
+    volPct.textContent = Math.round(video.volume*100) + '%';
+    volume.style.background = `linear-gradient(to right, #ff8800 0%, #ff8800 ${video.volume*100}%, #ffe0b3 ${video.volume*100}%, #ffe0b3 100%)`;
+    if(video.muted || video.volume === 0) btnMute.textContent = '🔇';
+    else if(video.volume < 0.5) btnMute.textContent = '🔉';
+    else btnMute.textContent = '🔊';
+  }
+  volume.addEventListener('input', ()=>{
+    video.volume = parseFloat(volume.value);
+    video.muted = false;
+    syncVolumeUI();
+  });
+  btnMute.addEventListener('click', ()=>{ video.muted = !video.muted; syncVolumeUI(); });
+
+  speed.addEventListener('change', ()=>{ video.playbackRate = parseFloat(speed.value); });
+
+  btnLoop.addEventListener('click', ()=>{
+    video.loop = !video.loop;
+    btnLoop.classList.toggle('active', video.loop);
+  });
+
+  btnSnapshot.addEventListener('click', ()=>{
+    if(!video.videoWidth) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(blob=>{
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `snapshot-${Date.now()}.png`;
+      a.click();
+    }, 'image/png');
+  });
+
+  subInput.addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    document.querySelectorAll('track').forEach(t=>t.remove());
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = file.name;
+    track.srclang = 'en';
+    track.default = true;
+    track.src = URL.createObjectURL(file);
+    video.appendChild(track);
+    setTimeout(()=>{ if(video.textTracks.length) video.textTracks[0].mode = 'showing'; }, 100);
+  });
+
+  btnPip.addEventListener('click', async ()=>{
+    try{
+      if(document.pictureInPictureElement) await document.exitPictureInPicture();
+      else if(document.pictureInPictureEnabled) await video.requestPictureInPicture();
+    }catch(err){ console.warn('PiP not available:', err); }
+  });
+
+  btnFullscreen.addEventListener('click', ()=>{
+    if(!document.fullscreenElement) container.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen();
+  });
+
+  document.addEventListener('keydown', e=>{
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    switch(e.key.toLowerCase()){
+      case ' ': e.preventDefault(); togglePlay(); break;
+      case 'arrowright': video.currentTime = Math.min(video.duration||0, video.currentTime+5); break;
+      case 'arrowleft': video.currentTime = Math.max(0, video.currentTime-5); break;
+      case 'arrowup': e.preventDefault(); video.volume = Math.min(1, video.volume+0.05); video.muted=false; syncVolumeUI(); break;
+      case 'arrowdown': e.preventDefault(); video.volume = Math.max(0, video.volume-0.05); syncVolumeUI(); break;
+      case 'm': btnMute.click(); break;
+      case 'f': btnFullscreen.click(); break;
+      case 's': btnStop.click(); break;
+      case 'e': btnNextFrame.click(); break;
+      case ',': btnPrevFrame.click(); break;
+      case '.': btnNextFrame.click(); break;
+    }
+  });
+
+  syncVolumeUI();
+  showSplash(true);
+})();
+</script>
+
+</body>
+</html>
