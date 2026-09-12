@@ -161,8 +161,8 @@
   },
   {
     "id": "virtualbox",
-    "name": "Virtualbox",
-    "icon": "V-B",
+    "name": "VirtualBox",
+    "icon": "VB",
     "description": "",
     "version": "1.0",
     "type": "html",
