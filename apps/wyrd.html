@@ -186,6 +186,7 @@ img{display:block;}
 .attach-chip img{width:100%;height:100%;object-fit:cover;}
 .attach-chip button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;}
 .msg-image{max-width:360px;max-height:360px;border-radius:8px;margin-top:6px;object-fit:cover;cursor:pointer;}
+.typing-indicator{min-height:20px;padding:0 16px;font-size:13px;color:var(--text-muted);font-style:italic;flex-shrink:0;}
 
 /* Member list */
 .member-list{width:240px;background:var(--bg-side);flex-shrink:0;overflow-y:auto;padding:16px 8px;}
@@ -448,34 +449,56 @@ img{display:block;}
   <div class="modal">
     <div style="position:relative;">
       <button class="close-x" data-close="modal-edit-profile">✕</button>
-      <div class="modal-header"><h2>Edit Profile</h2><p>Animated GIFs work great for avatar &amp; banner.</p></div>
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+        <p>Paste direct image or GIF URLs for your avatar and banner.</p>
+      </div>
     </div>
+
     <div class="modal-body">
-      <label>Banner</label>
-      <label class="upload-rect" id="ep-banner-preview" style="margin-top:8px;">
-        <span>+ Upload banner image/GIF</span>
-        <input type="file" accept="image/*" class="hidden" id="ep-banner-input" />
-      </label>
-      <div class="upload-row">
-        <label class="upload-circle" id="ep-avatar-preview">
-          <span>+ Avatar</span>
-          <input type="file" accept="image/*" class="hidden" id="ep-avatar-input" />
-        </label>
+      <div class="field">
+        <label>Banner URL</label>
+        <input id="ep-banner-url" type="url"
+               placeholder="https://example.com/banner.gif"
+               autocomplete="off" />
+        <div id="ep-banner-preview" class="upload-rect"
+             style="margin-top:8px; overflow:hidden;">
+          <span>Banner preview</span>
+        </div>
+      </div>
+
+      <div class="upload-row" style="align-items:flex-start;">
+        <div class="upload-circle" id="ep-avatar-preview">
+          <span>Avatar</span>
+        </div>
+
         <div style="flex:1;">
           <div class="field" style="margin-bottom:8px;">
+            <label>Avatar URL</label>
+            <input id="ep-avatar-url" type="url"
+                   placeholder="https://example.com/avatar.png"
+                   autocomplete="off" />
+          </div>
+
+          <div class="field">
             <label>Display name</label>
             <input id="ep-name" maxlength="32" />
           </div>
         </div>
       </div>
+
       <div class="field">
         <label>About me</label>
-        <input id="ep-bio" maxlength="190" placeholder="Say something about yourself..." />
+        <input id="ep-bio" maxlength="190"
+               placeholder="Say something about yourself..." />
       </div>
     </div>
+
     <div class="modal-footer">
-      <button class="btn secondary" data-close="modal-edit-profile" style="width:auto;">Cancel</button>
-      <button class="btn" id="ep-submit" style="width:auto;">Save Changes</button>
+      <button class="btn secondary" data-close="modal-edit-profile"
+              style="width:auto;">Cancel</button>
+      <button class="btn" id="ep-submit"
+              style="width:auto;">Save Changes</button>
     </div>
   </div>
 </div>
@@ -493,6 +516,12 @@ img{display:block;}
         <input id="gc-name" placeholder="e.g. Weekend Squad" maxlength="60" />
       </div>
       <div class="field">
+        <label>Group icon image URL (optional)</label>
+        <input id="gc-icon-url" type="url" autocomplete="off"
+               placeholder="https://example.com/group-icon.png" />
+        <div class="upload-hint">Paste a direct image URL.</div>
+      </div>
+      <div class="field">
         <label>Friends</label>
         <div id="gc-friend-list" style="max-height:220px;overflow-y:auto;"></div>
       </div>
@@ -500,6 +529,67 @@ img{display:block;}
     <div class="modal-footer">
       <button class="btn secondary" data-close="modal-create-gc" style="width:auto;">Cancel</button>
       <button class="btn" id="gc-submit" style="width:auto;">Create Group Chat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit group chat modal -->
+<div class="overlay" id="modal-edit-gc">
+  <div class="modal">
+    <div style="position:relative;">
+      <button class="close-x" data-close="modal-edit-gc">✕</button>
+      <div class="modal-header">
+        <h2>Edit Group Chat</h2>
+        <p>Change the group name or paste an image URL for the group icon.</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="upload-row">
+        <div class="upload-circle" id="egc-icon-preview"><span>Icon</span></div>
+        <div style="flex:1;">
+          <div class="field">
+            <label>Group name</label>
+            <input id="egc-name" maxlength="60" placeholder="Group Chat" />
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Icon image URL</label>
+            <input id="egc-icon-url" type="url" autocomplete="off"
+                   placeholder="https://example.com/group-icon.png" />
+            <div class="upload-hint">Use a direct image URL.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" data-close="modal-edit-gc" style="width:auto;">Cancel</button>
+      <button class="btn" id="egc-submit" style="width:auto;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image URL attachment modal -->
+<div class="overlay" id="modal-image-url">
+  <div class="modal">
+    <div style="position:relative;">
+      <button class="close-x" data-close="modal-image-url">✕</button>
+      <div class="modal-header">
+        <h2>Add Image</h2>
+        <p>Paste a direct image URL to attach it to your message.</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Image URL</label>
+        <input id="composer-image-url" type="url" autocomplete="off"
+               placeholder="https://example.com/image.png" />
+        <div id="composer-url-preview" class="upload-rect" style="margin-top:10px;">
+          <span>Image preview</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" data-close="modal-image-url" style="width:auto;">Cancel</button>
+      <button class="btn" id="composer-image-url-submit" style="width:auto;">Attach</button>
     </div>
   </div>
 </div>
@@ -588,8 +678,15 @@ let blockedUids = []; // uids I have blocked
 let incomingRequests = []; // profile docs of people who sent me a request
 let myFriendships = []; // [{id, participants:[uidA,uidB]}]
 let friendUids = []; // derived list of my friend uids
-let pendingIcon = null, pendingAvatarFile = null, pendingBannerFile = null;
+let pendingIcon = null;
 let unsubFriendships = null;
+let unsubTyping = null;              // listener on the current conversation's "typing" subcollection
+let myTypingDocRef = null;           // my own doc within that subcollection
+let typingUsersRaw = {};             // uid -> {name, updatedAtMillis} for the current conversation
+let isCurrentlyMarkedTyping = false; // whether my typing doc currently exists
+let lastTypingWriteTime = 0;         // throttle: last time we wrote our typing doc
+let typingStopTimeout = null;        // clears our typing doc after a pause in typing
+let typingExpireInterval = null;     // periodically re-renders to expire stale entries locally
 
 /* ---------------- Auth screen logic ---------------- */
 let mode = 'login';
@@ -678,6 +775,7 @@ function cleanupListeners(){
   if(unsubMyGroupChats) unsubMyGroupChats();
   if(unsubBlocked) unsubBlocked();
   if(unsubFriendships) unsubFriendships();
+  teardownTyping();
   Object.values(userListeners).forEach(fn=>fn());
   userListeners = {};
 }
@@ -744,7 +842,7 @@ function initApp(){
     (snap)=>{
       myGroupChats = snap.docs.map(d=>({id:d.id, ...d.data()}));
       myGroupChats.sort((a,b)=> (b.updatedAt?.toMillis?.()||0) - (a.updatedAt?.toMillis?.()||0));
-      myGroupChats.forEach(gc=> (gc.participants||[]).forEach(uid=>{ if(uid!==currentUser.uid) watchUser(uid, ()=>{ if(currentGC===gc.id) renderGCHeader(gc.id); if(currentView==='home') renderSidebar(); }); }));
+      myGroupChats.forEach(gc=> (gc.participants||[]).forEach(uid=>{ if(uid!==currentUser.uid) watchUser(uid, ()=>{ if(currentGC===gc.id) updateGCHeaderInPlace(gc.id); if(currentView==='home') renderSidebar(); }); }));
       if(currentView==='home') renderSidebar();
     }
   );
@@ -821,6 +919,7 @@ let currentFriendsPage = 'online';
 function goHome(){
   currentView = 'home'; currentChannel = null; currentDM = null; currentGC = null;
   $('member-list').classList.add('hidden');
+  teardownTyping();
   renderServerRail();
   $('sidebar-header').onclick = null;
   $('sidebar-title').textContent = 'Home';
@@ -874,7 +973,7 @@ function renderSidebar(){
       const names = others.map(u=>usersCache[u]?.username).filter(Boolean).join(', ');
       const item = document.createElement('div');
       item.className = 'dm-item' + (currentGC===gc.id ? ' active' : '');
-      item.innerHTML = `<span class="dm-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--bg-mod);">👥</span><span class="dm-name">${gc.name || names || 'Group Chat'}</span>`;
+      item.innerHTML = `<img class="dm-avatar" src="${gc.iconURL || avatarFallback(gc.name || names || 'Group Chat')}"/><span class="dm-name">${gc.name || names || 'Group Chat'}</span>`;
       item.onclick = () => openGroupChat(gc.id);
       list.appendChild(item);
     });
@@ -919,6 +1018,7 @@ function renderSidebar(){
 function setFriendsPage(page){
   currentFriendsPage = page;
   currentDM = null; currentChannel = null; currentGC = null;
+  teardownTyping();
   renderSidebar();
   renderFriendsPage();
 }
@@ -1111,7 +1211,7 @@ async function openDM(otherUid){
     return;
   }
   watchUser(otherUid, (p)=>{
-    if(currentDM===otherUid) renderChatHeader({type:'dm', name:p.username, avatar:p.avatarURL, status:p.status, uid:otherUid});
+    updateDMHeaderInPlace(otherUid, p);
   });
   renderChatHeader({type:'dm', name: usersCache[otherUid]?.username || '...', uid: otherUid});
   listenMessages(collection(db,'dms',id,'messages'));
@@ -1120,7 +1220,7 @@ async function openDM(otherUid){
     if(imageURL) msg.imageURL = imageURL;
     await addDoc(collection(db,'dms',id,'messages'), msg);
     await updateDoc(doc(db,'dms',id), { updatedAt: serverTimestamp(), lastMessage: text || '📷 Image' });
-  }, `Message @${usersCache[otherUid]?.username || ''}`, `messageImages/dm_${id}`);
+  }, `Message @${usersCache[otherUid]?.username || ''}`, `messageImages/dm_${id}`, collection(db,'dms',id,'typing'));
 }
 
 /* ---------------- Group Chats ---------------- */
@@ -1139,17 +1239,20 @@ function openCreateGroupChatModal(){
     });
   }
   $('gc-name').value = '';
+  $('gc-icon-url').value = '';
   openOverlay('modal-create-gc');
 }
 async function createGroupChatFlow(){
   const checked = Array.from(document.querySelectorAll('.gc-check:checked')).map(c=>c.value);
   if(checked.length < 2){ toast('Pick at least 2 friends for a group chat.'); return; }
   const name = $('gc-name').value.trim();
+  const iconURL = $('gc-icon-url').value.trim();
+  if(!validImageURL(iconURL)){ toast('Please enter a valid image URL.'); return; }
   $('gc-submit').disabled = true;
   try{
     const participants = [currentUser.uid, ...checked];
     const ref = await addDoc(collection(db,'groupChats'), {
-      name: name || null, ownerId: currentUser.uid, participants,
+      name: name || null, iconURL: iconURL || '', ownerId: currentUser.uid, participants,
       createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastMessage:''
     });
     closeOverlay('modal-create-gc');
@@ -1164,7 +1267,7 @@ async function openGroupChat(gcId){
   currentView = 'home'; currentChannel = null; currentDM = null; currentGC = gcId; currentFriendsPage = null;
   renderSidebar();
   const gc = myGroupChats.find(g=>g.id===gcId);
-  (gc?.participants||[]).forEach(uid=>{ if(uid!==currentUser.uid) watchUser(uid, ()=>{ if(currentGC===gcId) renderGCHeader(gcId); }); });
+  (gc?.participants||[]).forEach(uid=>{ if(uid!==currentUser.uid) watchUser(uid, ()=>{ if(currentGC===gcId) updateGCHeaderInPlace(gcId); }); });
   renderGCHeader(gcId);
   listenMessages(collection(db,'groupChats',gcId,'messages'));
   setupComposer(async (text, imageURL)=>{
@@ -1172,14 +1275,58 @@ async function openGroupChat(gcId){
     if(imageURL) msg.imageURL = imageURL;
     await addDoc(collection(db,'groupChats',gcId,'messages'), msg);
     await updateDoc(doc(db,'groupChats',gcId), { updatedAt: serverTimestamp(), lastMessage: text || '📷 Image' });
-  }, 'Message the group', `messageImages/gc_${gcId}`);
+  }, 'Message the group', `messageImages/gc_${gcId}`, collection(db,'groupChats',gcId,'typing'));
 }
 function renderGCHeader(gcId){
   const gc = myGroupChats.find(g=>g.id===gcId);
   if(!gc) return;
   const others = (gc.participants||[]).filter(u=>u!==currentUser.uid);
   const names = others.map(u=>usersCache[u]?.username || '...').join(', ');
-  renderChatHeader({type:'gc', name: gc.name || names || 'Group Chat'});
+  renderChatHeader({
+    type:'gc',
+    name: gc.name || names || 'Group Chat',
+    iconURL: gc.iconURL || '',
+    gcId
+  });
+}
+
+// Updates just the group chat name/icon text in the header without rebuilding
+// the whole chat-area. renderGCHeader() rebuilds #messages and the composer from
+// scratch, which was being triggered on every single message send (because
+// sending a GC message updates the groupChats doc's lastMessage/updatedAt,
+// which re-fires the myGroupChats listener). That caused messages to flash
+// and disappear for a moment after sending, until the message listener
+// re-populated the freshly-rebuilt #messages div.
+function updateGCHeaderInPlace(gcId){
+  const gc = myGroupChats.find(g=>g.id===gcId);
+  if(!gc) return;
+  const area = $('chat-area');
+  const header = area.querySelector('.chat-header');
+  if(!header) return; // header not currently rendered for this GC, nothing to update
+  const h3 = header.querySelector('h3');
+  if(!h3) return;
+  const others = (gc.participants||[]).filter(u=>u!==currentUser.uid);
+  const names = others.map(u=>usersCache[u]?.username || '...').join(', ');
+  const name = gc.name || names || 'Group Chat';
+  h3.textContent = name;
+  const icon = header.querySelector('img.gc-header-icon');
+  if(icon) icon.src = gc.iconURL || avatarFallback(name);
+}
+
+// Same idea as updateGCHeaderInPlace, but for DMs: updates the other person's
+// name/avatar in the header without rebuilding #messages or the composer,
+// which previously happened every time their profile (status, avatar, etc.)
+// changed while you had that DM open — losing anything you'd typed so far.
+function updateDMHeaderInPlace(uid, profile){
+  if(currentDM !== uid) return;
+  const area = $('chat-area');
+  const header = area.querySelector('.chat-header');
+  if(!header) return;
+  const h3 = header.querySelector('h3');
+  if(!h3) return;
+  h3.textContent = profile.username;
+  const avatarImg = header.querySelector('img.dm-avatar');
+  if(avatarImg) avatarImg.src = profile.avatarURL || avatarFallback(profile.username);
 }
 
 /* ---------------- Servers ---------------- */
@@ -1203,7 +1350,7 @@ function openChannel(serverId, channelId, channelName){
     };
     if(imageURL) msg.imageURL = imageURL;
     await addDoc(collection(db,'servers',serverId,'channels',channelId,'messages'), msg);
-  }, `Message #${channelName}`, `messageImages/server_${serverId}_${channelId}`);
+  }, `Message #${channelName}`, `messageImages/server_${serverId}_${channelId}`, collection(db,'servers',serverId,'channels',channelId,'typing'));
 }
 
 function renderMembers(server){
@@ -1231,8 +1378,8 @@ function renderChatHeader(info){
     headerLeft = `<span class="hash">#</span><h3>${info.name}</h3>`;
     headerRight = `<button class="members-toggle" id="toggle-members">Members</button>`;
   } else if(info.type==='gc'){
-    headerLeft = `<span class="hash">👥</span><h3>${info.name}</h3>`;
-    headerRight = '';
+    headerLeft = `<img class="gc-header-icon" src="${info.iconURL || avatarFallback(info.name)}"/><h3>${info.name}</h3>`;
+    headerRight = `<button class="members-toggle gc-settings-btn" id="gc-settings">Edit</button>`;
   } else {
     headerLeft = `<img class="dm-avatar" src="${(usersCache[info.uid]?.avatarURL)||avatarFallback(info.name)}" style="margin-right:2px;"/><h3>${info.name}</h3>`;
     headerRight = `<button class="members-toggle" style="margin-left:auto;">Profile</button>`;
@@ -1243,6 +1390,7 @@ function renderChatHeader(info){
       ${headerRight}
     </div>
     <div class="messages" id="messages"></div>
+    <div class="typing-indicator" id="typing-indicator"></div>
     <div class="attach-preview-row" id="composer-preview-row"></div>
     <div class="chat-input-wrap">
       <div class="chat-input-box">
@@ -1256,34 +1404,71 @@ function renderChatHeader(info){
     $('toggle-members').onclick = ()=> $('member-list').classList.toggle('hidden');
   } else if(info.type==='dm'){
     area.querySelector('.members-toggle').onclick = (e)=> openProfilePopoutFor(info.uid, e.target);
+  } else if(info.type==='gc'){
+    // This button was rendered but never wired up before, so clicking "Edit" did nothing.
+    $('gc-settings').onclick = () => openEditGroupChat(info.gcId);
   }
 }
 
 let pendingComposerAttachment = null;
-function setupComposer(onSend, placeholder, storagePrefix){
+let pendingComposerImageURL = null;
+function setupComposer(onSend, placeholder, storagePrefix, typingColRef){
   const input = $('composer-input');
   input.placeholder = placeholder;
   input.focus();
   pendingComposerAttachment = null;
+  pendingComposerImageURL = null;
   renderComposerPreview();
-  $('composer-attach-btn').onclick = () => $('composer-file-input').click();
+  setupTypingIndicator(typingColRef);
+
+  $('composer-attach-btn').onclick = () => {
+    $('composer-image-url').value = '';
+    $('composer-url-preview').innerHTML = '<span>Image preview</span>';
+    openOverlay('modal-image-url');
+    setTimeout(()=>$('composer-image-url').focus(), 0);
+  };
+
+  $('composer-image-url').oninput = () => {
+    renderURLPreview('composer-url-preview', $('composer-image-url').value, 'Image preview', false);
+  };
+
+  $('composer-image-url-submit').onclick = () => {
+    const url = $('composer-image-url').value.trim();
+    if(!validImageURL(url)){ toast('Please enter a valid image URL.'); return; }
+    pendingComposerImageURL = url;
+    renderComposerURLPreview();
+    closeOverlay('modal-image-url');
+    input.focus();
+  };
+
   $('composer-file-input').onchange = (e) => {
     const f = e.target.files[0];
     if(!f) return;
     if(!f.type.startsWith('image/')){ toast('Only image files are supported right now.'); return; }
     pendingComposerAttachment = f;
+    pendingComposerImageURL = null;
     renderComposerPreview();
     input.focus();
   };
+
+  input.oninput = () => {
+    if(input.value.trim()) notifyTyping();
+    else clearMyTypingStatus();
+  };
+
   input.onkeydown = async (e) => {
-    if(e.key === 'Enter' && (input.value.trim() || pendingComposerAttachment)){
+    if(e.key === 'Enter' && (input.value.trim() || pendingComposerAttachment || pendingComposerImageURL)){
+      e.preventDefault();
       const text = input.value.trim();
       const file = pendingComposerAttachment;
+      const imageURLFromPaste = pendingComposerImageURL;
       input.value = '';
       pendingComposerAttachment = null;
+      pendingComposerImageURL = null;
       renderComposerPreview();
+      clearMyTypingStatus();
       try{
-        let imageURL = null;
+        let imageURL = imageURLFromPaste || null;
         if(file){
           imageURL = await uploadImage(file, `${storagePrefix}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'')}`);
         }
@@ -1295,6 +1480,12 @@ function setupComposer(onSend, placeholder, storagePrefix){
 function renderComposerPreview(){
   const row = $('composer-preview-row');
   if(!row) return;
+  if(pendingComposerImageURL){
+    row.style.display = 'block';
+    row.innerHTML = `<div class="attach-chip"><img src="${pendingComposerImageURL}"/><button id="attach-remove-btn">✕</button></div>`;
+    $('attach-remove-btn').onclick = () => { pendingComposerImageURL = null; renderComposerPreview(); };
+    return;
+  }
   if(!pendingComposerAttachment){ row.style.display='none'; row.innerHTML=''; return; }
   const url = URL.createObjectURL(pendingComposerAttachment);
   row.style.display = 'block';
@@ -1302,12 +1493,18 @@ function renderComposerPreview(){
   $('attach-remove-btn').onclick = () => { pendingComposerAttachment = null; renderComposerPreview(); };
 }
 
+function renderComposerURLPreview(){
+  renderComposerPreview();
+}
+
+let currentMessages = [];
 function listenMessages(colRef){
   if(unsubMessages) unsubMessages();
+  currentMessages = [];
   const q = query(colRef, orderBy('createdAt','asc'), limit(200));
   unsubMessages = onSnapshot(q, (snap)=>{
-    const msgs = snap.docs.map(d=>({id:d.id, ...d.data()}));
-    renderMessages(msgs);
+    currentMessages = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderMessages(currentMessages);
   });
 }
 
@@ -1344,10 +1541,128 @@ function renderMessages(msgs){
     group.querySelector('.msg-avatar').onclick = (e)=> openProfilePopoutFor(m.authorId, e.target);
     group.querySelector('.msg-author').onclick = (e)=> openProfilePopoutFor(m.authorId, e.target);
     box.appendChild(group);
-    if(!usersCache[m.authorId]) watchUser(m.authorId, ()=>{ renderMessages(msgs); });
+    if(!usersCache[m.authorId]) watchUser(m.authorId, ()=>{ renderMessages(currentMessages); });
   });
   box.scrollTop = box.scrollHeight + 9999;
+  box.classList.remove('send-flash');
+  void box.offsetWidth;
+  box.classList.add('send-flash');
+  setTimeout(()=>box.classList.remove('send-flash'), 220);
 }
+
+/* ---------------- Typing indicator ---------------- */
+// Each conversation (channel / dm / group chat) gets its own "typing" subcollection.
+// Docs are keyed by uid; presence of a fresh doc means that user is currently typing.
+// We debounce writes so we're not hitting Firestore on every keystroke, and we
+// auto-delete our own doc after a short pause or once the message is sent.
+
+function teardownTyping(){
+  if(typingExpireInterval){ clearInterval(typingExpireInterval); typingExpireInterval = null; }
+  if(unsubTyping){ unsubTyping(); unsubTyping = null; }
+  clearMyTypingStatus();
+  myTypingDocRef = null;
+  typingUsersRaw = {};
+  const el = $('typing-indicator');
+  if(el) el.textContent = '';
+}
+
+function setupTypingIndicator(typingColRef){
+  teardownTyping();
+  if(!typingColRef) return;
+  myTypingDocRef = doc(typingColRef, currentUser.uid);
+  unsubTyping = onSnapshot(typingColRef, (snap)=>{
+    typingUsersRaw = {};
+    snap.docs.forEach(d=>{
+      if(d.id === currentUser.uid) return;
+      const data = d.data();
+      const updatedAtMillis = data.updatedAt?.toMillis ? data.updatedAt.toMillis() : 0;
+      typingUsersRaw[d.id] = { name: data.name || 'Someone', updatedAtMillis };
+    });
+    renderTypingIndicator();
+  });
+  // Re-render periodically so an indicator disappears on its own if the other
+  // person's tab closed / lost connection before it could clean up its doc.
+  typingExpireInterval = setInterval(renderTypingIndicator, 1500);
+}
+
+function renderTypingIndicator(){
+  const el = $('typing-indicator');
+  if(!el) return;
+  const now = Date.now();
+  const names = Object.values(typingUsersRaw)
+    .filter(u => now - u.updatedAtMillis < 6000)
+    .map(u => u.name);
+  if(!names.length){ el.textContent = ''; return; }
+  if(names.length === 1) el.textContent = `${names[0]} is typing...`;
+  else if(names.length === 2) el.textContent = `${names[0]} and ${names[1]} are typing...`;
+  else el.textContent = `${names.length} people are typing...`;
+}
+
+function notifyTyping(){
+  if(!myTypingDocRef) return;
+  const now = Date.now();
+  if(!isCurrentlyMarkedTyping || now - lastTypingWriteTime > 1500){
+    isCurrentlyMarkedTyping = true;
+    lastTypingWriteTime = now;
+    setDoc(myTypingDocRef, { name: myProfile.username, updatedAt: serverTimestamp() }).catch(()=>{});
+  }
+  if(typingStopTimeout) clearTimeout(typingStopTimeout);
+  typingStopTimeout = setTimeout(clearMyTypingStatus, 3000);
+}
+
+function clearMyTypingStatus(){
+  if(typingStopTimeout){ clearTimeout(typingStopTimeout); typingStopTimeout = null; }
+  if(myTypingDocRef && isCurrentlyMarkedTyping){
+    deleteDoc(myTypingDocRef).catch(()=>{});
+  }
+  isCurrentlyMarkedTyping = false;
+}
+
+async function openEditGroupChat(gcId){
+  const gc = myGroupChats.find(g=>g.id===gcId);
+  if(!gc) return;
+  if(gc.ownerId !== currentUser.uid){
+    toast('Only the group chat owner can edit it.');
+    return;
+  }
+  $('egc-name').value = gc.name || '';
+  $('egc-icon-url').value = gc.iconURL || '';
+  renderURLPreview('egc-icon-preview', gc.iconURL || '', 'Icon', true);
+  openOverlay('modal-edit-gc');
+}
+
+$('egc-icon-url').oninput = () => {
+  const url = $('egc-icon-url').value.trim();
+  if(url && !validImageURL(url)) return;
+  renderURLPreview('egc-icon-preview', url, 'Icon', true);
+};
+
+$('egc-submit').onclick = async () => {
+  if(!currentGC) return;
+  const gc = myGroupChats.find(g=>g.id===currentGC);
+  if(!gc || gc.ownerId !== currentUser.uid){
+    toast('Only the group chat owner can edit it.');
+    return;
+  }
+  const name = $('egc-name').value.trim();
+  const iconURL = $('egc-icon-url').value.trim();
+  if(!validImageURL(iconURL)){ toast('Please enter a valid image URL.'); return; }
+  $('egc-submit').disabled = true;
+  try{
+    await updateDoc(doc(db,'groupChats',currentGC), {
+      name: name || null,
+      iconURL: iconURL || ''
+    });
+    closeOverlay('modal-edit-gc');
+    toast('Group chat updated.');
+    renderSidebar();
+    updateGCHeaderInPlace(currentGC);
+  }catch(e){
+    console.error('Group chat update failed:', e);
+    toast('Could not update group chat: ' + (e.code || e.message || 'unknown error'));
+  }
+  $('egc-submit').disabled = false;
+};
 
 /* ---------------- Profile popout ---------------- */
 function openProfilePopoutFor(uid, anchorEl){
@@ -1547,46 +1862,118 @@ $('cc-submit').onclick = async () => {
 $('gc-submit').onclick = createGroupChatFlow;
 
 /* Edit profile */
+function validImageURL(value){
+  const url = (value || '').trim();
+  if(!url) return true;
+
+  try{
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  }catch{
+    return false;
+  }
+}
+
+function renderURLPreview(id, url, fallback, isAvatar){
+  const el = $(id);
+  if(!el) return;
+
+  const clean = (url || '').trim();
+
+  if(!clean){
+    el.innerHTML = `<span>${fallback}</span>`;
+    return;
+  }
+
+  const style = isAvatar
+    ? 'width:100%;height:100%;object-fit:cover;'
+    : 'width:100%;height:100%;object-fit:cover;';
+
+  el.innerHTML = `
+    <img
+      src="${clean}"
+      alt="${isAvatar ? 'Avatar' : 'Banner'} preview"
+      style="${style}"
+      onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend','<span>Image failed to load</span>');"
+    />
+  `;
+}
+
 function openEditProfile(){
-  pendingAvatarFile = null; pendingBannerFile = null;
   const p = usersCache[currentUser.uid] || myProfile;
+
   $('ep-name').value = p.username || '';
   $('ep-bio').value = p.bio || '';
-  $('ep-avatar-preview').innerHTML = (p.avatarURL ? `<img src="${p.avatarURL}"/>` : `<span>+ Avatar</span>`) + `<input type="file" accept="image/*" class="hidden" id="ep-avatar-input"/>`;
-  $('ep-banner-preview').innerHTML = (p.bannerURL ? `<img src="${p.bannerURL}"/>` : `<span>+ Upload banner image/GIF</span>`) + `<input type="file" accept="image/*" class="hidden" id="ep-banner-input"/>`;
-  bindEditUploads();
+  $('ep-avatar-url').value = p.avatarURL || '';
+  $('ep-banner-url').value = p.bannerURL || '';
+
+  renderURLPreview('ep-avatar-preview', p.avatarURL, 'Avatar', true);
+  renderURLPreview('ep-banner-preview', p.bannerURL, 'Banner preview', false);
+
   openOverlay('modal-edit-profile');
 }
-function bindEditUploads(){
-  $('ep-avatar-input').addEventListener('change', (e)=>{
-    const f = e.target.files[0]; if(!f) return;
-    pendingAvatarFile = f;
-    const url = URL.createObjectURL(f);
-    $('ep-avatar-preview').innerHTML = `<img src="${url}"/><input type="file" accept="image/*" class="hidden" id="ep-avatar-input"/>`;
-    bindEditUploads();
-  });
-  $('ep-banner-input').addEventListener('change', (e)=>{
-    const f = e.target.files[0]; if(!f) return;
-    pendingBannerFile = f;
-    const url = URL.createObjectURL(f);
-    $('ep-banner-preview').innerHTML = `<img src="${url}"/><input type="file" accept="image/*" class="hidden" id="ep-banner-input"/>`;
-    bindEditUploads();
-  });
-}
+
+$('ep-avatar-url').addEventListener('input', e => {
+  renderURLPreview('ep-avatar-preview', e.target.value, 'Avatar', true);
+});
+
+$('ep-banner-url').addEventListener('input', e => {
+  renderURLPreview('ep-banner-preview', e.target.value, 'Banner preview', false);
+});
+
 $('ep-submit').onclick = async () => {
-  $('ep-submit').disabled = true;
+  if(!currentUser || !myProfile) return;
+
+  const button = $('ep-submit');
+  button.disabled = true;
+  button.textContent = 'Saving...';
+
   try{
-    const updates = { username: $('ep-name').value.trim() || myProfile.username, usernameLower: ($('ep-name').value.trim()||myProfile.username).toLowerCase(), bio: $('ep-bio').value.trim() };
-    if(pendingAvatarFile) updates.avatarURL = await uploadImage(pendingAvatarFile, `avatars/${currentUser.uid}_${Date.now()}`);
-    if(pendingBannerFile) updates.bannerURL = await uploadImage(pendingBannerFile, `banners/${currentUser.uid}_${Date.now()}`);
-    await updateDoc(doc(db,'users',currentUser.uid), updates);
+    const username = $('ep-name').value.trim() || myProfile.username;
+    const avatarURL = $('ep-avatar-url').value.trim();
+    const bannerURL = $('ep-banner-url').value.trim();
+
+    if(!validImageURL(avatarURL)){
+      toast('Avatar URL must start with http:// or https://');
+      $('ep-avatar-url').focus();
+      return;
+    }
+
+    if(!validImageURL(bannerURL)){
+      toast('Banner URL must start with http:// or https://');
+      $('ep-banner-url').focus();
+      return;
+    }
+
+    const updates = {
+      username,
+      usernameLower: username.toLowerCase(),
+      bio: $('ep-bio').value.trim(),
+      avatarURL: avatarURL || '',
+      bannerURL: bannerURL || ''
+    };
+
+    // Profile images are now stored as plain URLs in Firestore.
+    // No Firebase Storage upload is used here.
+    await updateDoc(doc(db, 'users', currentUser.uid), updates);
+
     myProfile = {...myProfile, ...updates};
-    usersCache[currentUser.uid] = {id: currentUser.uid, ...myProfile};
+    usersCache[currentUser.uid] = {
+      id: currentUser.uid,
+      ...myProfile
+    };
+
     renderMyBar();
     closeOverlay('modal-edit-profile');
     toast('Profile updated!');
-  }catch(e){ console.error(e); toast('Could not save profile.'); }
-  $('ep-submit').disabled = false;
+
+  }catch(e){
+    console.error('Could not save profile:', e);
+    toast('Could not save profile: ' + (e?.message || e?.code || 'unknown error'));
+  }finally{
+    button.disabled = false;
+    button.textContent = 'Save Changes';
+  }
 };
 
 /* My bar interactions */
