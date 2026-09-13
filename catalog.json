@@ -100,46 +100,6 @@
     "url": "https://donutzwebdev.github.io/draft9-store/apps/products.html"
   },
   {
-    "id": "test-app",
-    "name": "test",
-    "icon": "📦",
-    "description": "",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/test-app.html"
-  },
-  {
-    "id": "resident-evil",
-    "name": "resident evil",
-    "icon": "☣︎",
-    "description": "netanyahu",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/resident-evil.html"
-  },
-  {
-    "id": "silent-hill",
-    "name": "silent hill",
-    "icon": "🌫️",
-    "description": "",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/silent-hill.html"
-  },
-  {
-    "id": "portal",
-    "name": "Portal",
-    "icon": "0",
-    "description": "",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/portal.html"
-  },
-  {
     "id": "vlc-media-player",
     "name": "VLC Media Player",
     "icon": "⚠️",
@@ -170,16 +130,6 @@
     "url": "https://donutzwebdev.github.io/draft9-store/apps/virtualbox.html"
   },
   {
-    "id": "nightcordv1",
-    "name": "NightCordV1",
-    "icon": "⌨️",
-    "description": "Very simple discord like app",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/nightcordv1.html"
-  },
-  {
     "id": "tetris",
     "name": "Tetris",
     "icon": "🧩",
@@ -198,15 +148,6 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/snake.html"
-  },
-  {
-    "id": "nightcordv2",
-    "name": "NightCordV2",
-    "icon": "⌨️",
-    "description": "",
-    "version": "1.0",
-    "type": "html",
-    "category": "Community",
-    "url": "https://donutzwebdev.github.io/draft9-store/apps/nightcordv2.html"
+ 
   }
 ]
