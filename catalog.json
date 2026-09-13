@@ -178,5 +178,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/nightcordv1.html"
+  },
+  {
+    "id": "tetris",
+    "name": "Tetris",
+    "icon": "🧩",
+    "description": "Place block you feel me",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/tetris.html"
   }
 ]
