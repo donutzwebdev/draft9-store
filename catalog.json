@@ -198,5 +198,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/snake.html"
+  },
+  {
+    "id": "nightcordv2",
+    "name": "NightCordV2",
+    "icon": "⌨️",
+    "description": "",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/nightcordv2.html"
   }
 ]
