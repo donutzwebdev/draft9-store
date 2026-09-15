@@ -178,5 +178,15 @@
     "type": "html",
     "category": "Community",
     "url": "https://donutzwebdev.github.io/draft9-store/apps/ashgrove-manor.html"
+  },
+  {
+    "id": "ashgrove-manor-v2",
+    "name": "ASHGROVE MANOR V2",
+    "icon": "🏠",
+    "description": "a horror co op game with support for up to 3 people",
+    "version": "1.0",
+    "type": "html",
+    "category": "Community",
+    "url": "https://donutzwebdev.github.io/draft9-store/apps/ashgrove-manor-v2.html"
   }
 ]
